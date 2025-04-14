@@ -10,7 +10,7 @@ export default function Camera() {
   const [photo, setPhoto] = useState<any>(null);
   const cameraRef = React.createRef<CameraView | null>(null);
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
-
+  const savedHighlightedAreas = [{"color": "#315C5A", "height": 46.666666666666686, "index": 0, "width": 52.666656494140625, "x": 17, "y": 81}, {"color": "#571FCB", "height": 45.66667175292969, "index": 1, "width": 64, "x": 83.66665649414062, "y": 97.66665649414062}, {"color": "#0F319E", "height": 54.99999491373697, "index": 2, "width": 60, "x": 164, "y": 92}, {"color": "#0DE6CC", "height": 55.33333333333334, "index": 3, "width": 92.33334350585938, "x": 235.66665649414062, "y": 95.66665649414062}]
   if (!permission) {
     // Camera permissions are still loading.
     return <View />;
