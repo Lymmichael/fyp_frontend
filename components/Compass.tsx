@@ -1,55 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Magnetometer } from 'expo-sensors';
+import * as Location from 'expo-location';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 const Compass = () => {
-  const [angle, setAngle] = useState(0);
+  const [angle, setAngle] = useState<number | null>(null);
 
   useEffect(() => {
-    const _subscribe = async () => {
-      const { status } = await Magnetometer.requestPermissionsAsync();
-      if (status === 'granted') {
-        Magnetometer.addListener(result => {
-          const angleRad = Math.atan2(result.y, result.x);
-          const angleDeg = angleRad * (180 / Math.PI);
-          setAngle(angleDeg);
-        });
+    let subscription: Location.LocationSubscription | null = null;
+
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.warn('Permission to access location was denied');
+        return;
       }
+
+      subscription = await Location.watchHeadingAsync((heading) => {
+        const headingAngle = heading.trueHeading ?? heading.magHeading ?? 0;
+        setAngle(headingAngle);
+      });
+    })();
+
+    return () => {
+      subscription?.remove();
     };
-    _subscribe();
   }, []);
 
-  const isFacingWest = () => {
-    // North is between -10° and 10° or between 350° and 360°
-    return (angle >= -10 && angle <= 10) || (angle >= 350);
-  };
+  // Convert angle to compass direction
+  const getDirection = (deg: number | null): string => {
+    if (deg === null) return '';
 
-  const isFacingEast = () => {
-    // South is between 170° and 190°
-    return (angle >= 170 && angle <= 190);
-  };
+    if (deg >= 337.5 || deg < 22.5) return 'N';
+    if (deg >= 22.5 && deg < 67.5) return 'NE';
+    if (deg >= 67.5 && deg < 112.5) return 'E';
+    if (deg >= 112.5 && deg < 157.5) return 'SE';
+    if (deg >= 157.5 && deg < 202.5) return 'S';
+    if (deg >= 202.5 && deg < 247.5) return 'SW';
+    if (deg >= 247.5 && deg < 292.5) return 'W';
+    if (deg >= 292.5 && deg < 337.5) return 'NW';
 
-  const isFacingSouth = () => {
-    return (angle >= -100 && angle <= -80);
-  }
+    return '';
+  };
 
   return (
-    <View style={styles.compassContainer}>
-      <Text style={styles.compassText}>Direction: {angle.toFixed(2)}°</Text>
-      {isFacingWest() && (
-        <Text style={styles.directionText}>You are facing West!</Text>
-      )}
-      {isFacingSouth() && (
-        <Text style={styles.directionText}>You are facing South! Please go ahead</Text>
-      )}
-      {isFacingEast() && (
-        <Text style={styles.directionText}>You are facing East!</Text>
-      )}
-      {/* Add a visual compass here, e.g., an arrow pointing in the direction */}
-      <View style={[styles.arrow, { transform: [{ rotate: `${angle}deg` }] }]}>
-        <View style={styles.arrowHead} />
+    <>
+      {
+        getDirection(angle) == 'N' && 
+        <AntDesign name="arrowup" size={250} color="red" />
+      }
+
+      <View style={styles.compassContainer}>
+        <Text style={styles.compassText}>
+          Direction: {angle !== null ? angle.toFixed(2) + '°' : 'Loading...'}
+        </Text>
+
+        <Text style={styles.directionText}>
+          {angle !== null ? `You are facing ${getDirection(angle)}` : ''}
+        </Text>
       </View>
-    </View>
+    </>
   );
 };
 
@@ -57,28 +67,44 @@ const styles = StyleSheet.create({
   compassContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    flex: 1,
+    backgroundColor: 'white',
   },
   compassText: {
-    fontSize: 18,
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: 'black',
+    backgroundColor: 'white',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+    overflow: 'hidden',
   },
   directionText: {
-    fontSize: 18,
-    color: 'green',
+    fontSize: 28,
+    color: 'black',
+    backgroundColor: 'white',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+    marginTop: 10,
+    overflow: 'hidden',
   },
   arrow: {
-    width: 50,
-    height: 50,
+    width: 100,
+    height: 100,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 20,
   },
   arrowHead: {
     width: 0,
     height: 0,
-    borderLeftWidth: 10,
+    borderLeftWidth: 20,
     borderLeftColor: 'transparent',
-    borderRightWidth: 10,
+    borderRightWidth: 20,
     borderRightColor: 'transparent',
-    borderTopWidth: 25,
+    borderTopWidth: 50,
     borderTopColor: 'red',
   },
 });

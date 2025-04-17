@@ -9,13 +9,18 @@ import {
   Dimensions,
   ScrollView,
   Animated,
+  PanResponder,
 } from 'react-native';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
-import Compass from '../../components/Compass';
+import Compass from './components/Compass';
 import floorplan from '../../image/floorplan.jpg';
 import { AntDesign } from '@expo/vector-icons';
 
-const savedHighlightedArea = [{"accessibleNode": [7, 5, 4], "color": "#34B3BB", "height": 78, "id": 0, "name": "Bedroom1", "width": 56.66667175292969, "x": 24.333328247070312, "y": 66.33332824707031}, {"accessibleNode": [5, 6], "color": "#6C0D94", "height": 52.333343505859375, "id": 1, "name": "Bedroom2", "width": 40, "x": 92.33332824707031, "y": 89.66665649414062}, {"accessibleNode": [3, 5, 7], "color": "#FD0373", "height": 45, "id": 2, "name": "Kitchen", "width": 33, "x": 119.66665649414062, "y": 2}, {"accessibleNode": [0, 1], "color": "#A634A4", "height": 38.33332824707031, "id": 3, "name": "Living room", "width": 33.333343505859375, "x": 77.66665649414062, "y": 5}, {"accessibleNode": [0, 2], "color": "#319398", "height": 46, "id": 4, "name": "entry", "width": 29.333328247070312, "x": 29, "y": 6}, {"accessibleNode": [1, 2], "color": "#EDCA97", "height": 102, "id": 5, "name": "Dining room", "width": 40.33332824707031, "x": 168, "y": 44.33332824707031}, {"accessibleNode": [1, 3], "color": "#8DEEBD", "height": 47, "id": 6, "name": "Room", "width": 97, "x": 116.33332824707031, "y": 152.3333282470703}, {"accessibleNode": [3, 5, 4], "color": "#3A013C", "height": 60.666656494140625, "id": 7, "name": "Toilet", "width": 41, "x": 216.3333282470703, "y": 83}, {"accessibleNode": [5], "color": "#EC14D6", "height": 121, "id": 8, "name": "Room2", "width": 54, "x": 264.3333282470703, "y": 28}];
+const savedHighlightedArea = [
+  { accessibleNode: [], color: '#39889A', height: 48.66, id: 0, name: 'room number 1', width: 47, x: 89.66, y: 92 },
+  { accessibleNode: [], color: '#A5B571', height: 80.33, id: 1, name: 'room 2', width: 50.66, x: 26.66, y: 62.33 },
+  { accessibleNode: [], color: '#9F65A9', height: 30.66, id: 2, name: 'room 3', width: 38.33, x: 218.33, y: 42 },
+];
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -27,9 +32,35 @@ export default function Camera() {
   const [iImageMSmaller, setiImageSmaller] = useState(true);
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [scanedResult, setScanedResult] = useState(0); 
-  
+  const [scanedResult, setScanedResult] = useState(0);
+
   const slideAnim = useRef(new Animated.Value(-screenHeight)).current;
+
+  const translateX = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        console.log('PanResponder Grant');
+      },
+      onPanResponderMove: Animated.event(
+        [
+          null,
+          {
+            dx: translateX,
+            dy: translateY,
+          },
+        ],
+        { useNativeDriver: false }
+      ),
+      onPanResponderRelease: () => {
+        console.log('PanResponder Release');
+      },
+    })
+  ).current;
 
   useEffect(() => {
     if (isSearching) {
@@ -77,10 +108,10 @@ export default function Camera() {
   };
 
   const handleNodeSelection = (node: any) => {
-    if(selectedNode == node) {
-      setSelectedNode(null)
+    if (selectedNode == node) {
+      setSelectedNode(null);
     } else {
-    setSelectedNode(node);
+      setSelectedNode(node);
     }
     console.log(`Selected Node: ${node.name}`);
   };
@@ -107,7 +138,7 @@ export default function Camera() {
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef} zoom = {0.01}>
+      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
         <View style={styles.compassContainer}>
           <Compass />
         </View>
@@ -173,7 +204,18 @@ export default function Camera() {
         </View>
 
         <ScrollView style={styles.nodeList}>
-          <View style={containerStyle} style={{ width: 350, height: 200 }}>
+          <Animated.View
+            style={{
+              width: 350,
+              height: 200,
+              transform: [
+                { scale: scale },
+                { translateX: translateX },
+                { translateY: translateY },
+              ],
+            }}
+            {...panResponder.panHandlers}
+          >
             <Image source={floorplan} style={{ width: 350, height: 200 }} />
 
             {filteredSavedHighlightedArea(savedHighlightedArea, scanedResult, chosenId).map((area) => (
@@ -191,12 +233,7 @@ export default function Camera() {
                 ]}
               />
             ))}
-          </View>
-          <Text style={{
-            fontSize: 20,
-            fontWeight: 'bold',
-            padding: 5
-          }}>Select your destination:</Text>
+          </Animated.View>
           {savedHighlightedArea
             .filter(node => node.id !== scanedResult)  // exclude nodes where id equals xx
             .map((node) => (
@@ -213,12 +250,12 @@ export default function Camera() {
             ))}
         </ScrollView>
 
-        {/* {photo && (
+        {photo && (
           <View style={styles.photoPreview}>
             <Text style={{ marginBottom: 5 }}>Photo Preview:</Text>
             <Image source={{ uri: photo.uri }} style={styles.photo} />
           </View>
-        )} */}
+        )}
       </Animated.View>
     </View>
   );
@@ -283,7 +320,7 @@ const styles = StyleSheet.create({
   },
   nodeList: {
     top: 30,
-    maxHeight: screenHeight * 0.8,
+    maxHeight: screenHeight * 0.5,
   },
   nodeButton: {
     backgroundColor: '#ccc',

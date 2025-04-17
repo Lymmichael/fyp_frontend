@@ -6,7 +6,7 @@ import Slider from '@react-native-community/slider';
 import LoginPage from '../../components/Login';
 
 export default function UploadPage() {
-  const [isLogin, setIsLogin] = useState(false)
+  const [isLogin, setIsLogin] = useState(true)
   const [selectedImage, setSelectedImage] = useState(null);
   const [orientation, setOrientation] = useState(0);
   const [startX, setStartX] = useState(0);
@@ -25,7 +25,8 @@ export default function UploadPage() {
   const [selectedArea, setSelectedArea] = useState(null);
   const [selectedAreasToGo, setSelectedAreasToGo] = useState({});
   const [uploadSuccess, setUplaodSuccess] = useState(true)
-  
+  const [modalVisible, setModalVisible] = React.useState(false);
+
   if (!isLogin) {
     return (<LoginPage />)
   }
@@ -184,7 +185,7 @@ export default function UploadPage() {
       })
     );
   };
-
+  
   if (firstProcedure) {
     return (
       <>
@@ -252,22 +253,24 @@ export default function UploadPage() {
               <Text style={{ color: 'white' }}> 0 is North; 90 is East; 180 is South and 270 is West</Text>
             </View>
           }
-          <Button
-            title='Next'
-            onPress={
-              () => {
-                if(!selectedImage) {
-                  Alert.alert("Please upload the image")
-                } else if(savedAreas.length == 0) {
-                  Alert.alert("Please highlight area you want")
-                } else {
-                  console.log(savedAreas)
-                  setFirstProcedure(false)
-                  setSecondProcedure(true)
+          <View style={{ marginBottom: 50 }}>
+            <Button
+              title='Next'
+              onPress={
+                () => {
+                  if (!selectedImage) {
+                    Alert.alert("Please upload the image")
+                  } else if (savedAreas.length == 0) {
+                    Alert.alert("Please highlight area you want")
+                  } else {
+                    console.log(savedAreas)
+                    setFirstProcedure(false)
+                    setSecondProcedure(true)
+                  }
                 }
               }
-            }
-          />
+            />
+          </View>
         </View>
       </>
     )
@@ -316,24 +319,27 @@ export default function UploadPage() {
             />
           </View>
         ))}
-        <Button
-          title='Next'
-          onPress={() => {
-            // Check if any area name is missing or empty
-            const allNamesFilled = savedAreas.every(area => {
-              const name = areaNames[area.id];
-              return name && name.trim().length > 0;
-            });
+        <View style={{ marginBottom: 50 }}>
+          <Button
+            title='Next'
+            onPress={() => {
+              // Check if any area name is missing or empty
+              const allNamesFilled = savedAreas.every(area => {
+                const name = areaNames[area.id];
+                return name && name.trim().length > 0;
+              });
 
-            if (!allNamesFilled) {
-              Alert.alert("Please fill in all the names of different areas");
-            } else {
-              updateAreaNames();
-              setSecondProcedure(false);
-              setThirdProcedure(true);
-            }
-          }}
-        />
+              if (!allNamesFilled) {
+                Alert.alert("Please fill in all the names of different areas");
+              } else {
+                updateAreaNames();
+                setSecondProcedure(false);
+                setThirdProcedure(true);
+              }
+            }}
+          />
+        </View>
+
       </ScrollView>
     );
   } else if (thirdProcedure) {
@@ -384,7 +390,7 @@ export default function UploadPage() {
                 .map((otherArea) => otherArea.name)
                 .join(', ')}
             </Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => handleSelectArea(area)}
               style={styles.selectButton}
             >
@@ -415,21 +421,24 @@ export default function UploadPage() {
               ))}
           </View>
         )}
-        <Button
-          title='next'
-          onPress={() => {
-            highlightedAreas.forEach(node => {
-              const nodeId = node.id.toString();
-              if (selectedAreasToGo[nodeId]) {
-                node.accessibleNode = selectedAreasToGo[nodeId];
-              }
-            })
+        <View style={{marginBottom: 50}}>
+          <Button
+            title='next'
+            onPress={() => {
+              highlightedAreas.forEach(node => {
+                const nodeId = node.id.toString();
+                if (selectedAreasToGo[nodeId]) {
+                  node.accessibleNode = selectedAreasToGo[nodeId];
+                }
+              })
 
-            setThirdProcedure(false)
-            console.log(selectedAreasToGo)
-            console.log(highlightedAreas)
-          }}
-        />
+              setThirdProcedure(false)
+              console.log(selectedAreasToGo)
+              console.log(highlightedAreas)
+            }}
+          />
+        </View>
+
       </ScrollView>
     );
   } else {
@@ -463,15 +472,28 @@ export default function UploadPage() {
         ))}
       </View>
       {savedAreas.map((area, index) => (
-        <View key={index}>
-          <Text style={{ color: area.color }}>
+        <View key={index} style={{ marginBottom: 20 }}>
+          <Text style={{ color: area.color, fontSize: 18, fontWeight: 'bold' }}>
             {area.name}
           </Text>
-          <Text style={{ color: 'white' }}>
-            upload video
-          </Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor: area.color,
+              paddingVertical: 10,
+              paddingHorizontal: 20,
+              borderRadius: 8,
+              alignItems: 'center',
+            }}
+            onPress={() => {
+              // Your button press handler here
+              console.log(`Upload video for ${area.name}`);
+            }}
+          >
+            <Text style={{ color: 'white', fontSize: 16 }}>Upload</Text>
+          </TouchableOpacity>
         </View>
       ))}
+
       <Button
         title='Done'
         onPress={() => {
@@ -481,14 +503,15 @@ export default function UploadPage() {
             }
           } else {
             console.log("areaNames is: ")
-            console.log(areaNames)
+            // console.log(areaNames)
             console.log("highlightedAreas are: ")
             console.log(highlightedAreas)
             setUplaodSuccess(true)
           }
         }}
       />
-      {uploadSuccess && <Text style={{ color: 'white' }}>
+      {uploadSuccess && 
+      <Text style={{ color: 'white', padding: 10, marginBottom: 50 }}>
         Successfully Upload, Once the model is trained, we will send you a email!
       </Text>}
     </ScrollView>
@@ -498,7 +521,7 @@ export default function UploadPage() {
 const styles = StyleSheet.create({
   container: {
     top: 30,
-    padding: 30, // Optional padding for better readability
+    padding: 20, // Optional padding for better readability
   },
   highlight: {
     position: 'absolute',

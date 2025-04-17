@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Keyboard } from 'react-native';
 
-interface Props {}
+interface Props { }
 
 const LoginPage: React.FC<Props> = () => {
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-
+    const [registerMode, setRegisterMode] = useState<boolean>(false)
     const handleLogin = () => {
         if (username === 'user' && password === 'password') {
             Alert.alert('Login Successful');
@@ -17,16 +17,16 @@ const LoginPage: React.FC<Props> = () => {
     };
 
     const dismissKeyboard = () => {
-      Keyboard.dismiss();
+        Keyboard.dismiss();
     };
 
     return (
         <TouchableOpacity
-          style={styles.container}
-          activeOpacity={1}
-          onPress={dismissKeyboard}
+            style={styles.container}
+            activeOpacity={1}
+            onPress={dismissKeyboard}
         >
-            <Text style={styles.title}>Login</Text>
+            <Text style={styles.title}>{registerMode ? "Register" : "Login"}</Text>
             <TextInput
                 style={styles.input}
                 placeholder="Username"
@@ -42,9 +42,34 @@ const LoginPage: React.FC<Props> = () => {
                 onChangeText={setPassword}
                 placeholderTextColor="#aaa"
             />
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Login</Text>
-            </TouchableOpacity>
+            {!registerMode &&
+                <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                    <Text style={styles.buttonText}>Login</Text>
+                </TouchableOpacity>
+            }
+                {!registerMode && 
+                    <TouchableOpacity onPress={() => setRegisterMode(true)}>
+                        <Text style = {{ top: 10}}>Don't have an account?</Text>
+                    </TouchableOpacity>
+                }
+                {registerMode &&
+                    <><TouchableOpacity style={styles.button}
+                        onPress={() => {
+                            setRegisterMode(true)
+                            Alert.alert("Register Successful")
+                        }
+                        }>
+                        <Text style={styles.buttonText}>register</Text>
+                    </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => {
+                                setRegisterMode(false)
+                            }
+                            }>
+                            <Text style = {{ top: 10}}>back to login</Text>
+                        </TouchableOpacity>
+                    </>
+                }
         </TouchableOpacity>
     );
 };
