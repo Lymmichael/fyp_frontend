@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { View, Button, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Button, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Alert, Modal } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import Slider from '@react-native-community/slider';
 import LoginPage from '../../components/Login';
 
 export default function UploadPage() {
-  const [isLogin, setIsLogin] = useState(true)
+  const [isLogin, setIsLogin] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [orientation, setOrientation] = useState(0);
   const [startX, setStartX] = useState(0);
@@ -18,17 +18,17 @@ export default function UploadPage() {
   const [savedAreas, setSavedAreas] = useState([]);
   const [usedColors, setUsedColors] = useState(new Set()); // Set to store unique colors
   const [uploadedVideos, setUploadedVideos] = useState({}); // Object to store uploaded videos for each area
-  const [firstProcedure, setFirstProcedure] = useState(true)
-  const [secondProcedure, setSecondProcedure] = useState(false)
-  const [thirdProcedure, setThirdProcedure] = useState(false)
+  const [firstProcedure, setFirstProcedure] = useState(true);
+  const [secondProcedure, setSecondProcedure] = useState(false);
+  const [thirdProcedure, setThirdProcedure] = useState(false);
   const [areaNames, setAreaNames] = useState({});
   const [selectedArea, setSelectedArea] = useState(null);
   const [selectedAreasToGo, setSelectedAreasToGo] = useState({});
-  const [uploadSuccess, setUplaodSuccess] = useState(true)
-  const [modalVisible, setModalVisible] = React.useState(false);
+  const [uploadSuccess, setUplaodSuccess] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
 
   if (!isLogin) {
-    return (<LoginPage />)
+    return (<LoginPage />);
   }
   const openImagePicker = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -99,7 +99,7 @@ export default function UploadPage() {
     const updatedAreas = highlightedAreas.map((area) => ({ ...area, name: areaNames[area.id] }));
     setHighlightedAreas(updatedAreas); // Update highlightedAreas with names
     setSavedAreas(updatedAreas); // Update savedAreas with names
-    console.log(highlightedAreas)
+    console.log(highlightedAreas);
   };
 
   const getRandomColor = () => {
@@ -151,6 +151,7 @@ export default function UploadPage() {
 
   const handleSelectArea = (area) => {
     setSelectedArea(area);
+    setModalVisible(true);
     setSelectedAreasToGo((prev) => ({ ...prev, [area.id]: area.accessibleNode }));
   };
 
@@ -171,7 +172,6 @@ export default function UploadPage() {
       ...prev,
       [selectedArea.id]: updatedSelection,
     }));
-
     // Update savedAreas state
     setSavedAreas((prevAreas) =>
       prevAreas.map((area) => {
@@ -185,7 +185,7 @@ export default function UploadPage() {
       })
     );
   };
-  
+
   if (firstProcedure) {
     return (
       <>
@@ -259,13 +259,13 @@ export default function UploadPage() {
               onPress={
                 () => {
                   if (!selectedImage) {
-                    Alert.alert("Please upload the image")
-                  } else if (savedAreas.length == 0) {
-                    Alert.alert("Please highlight area you want")
+                    Alert.alert("Please upload the image");
+                  } else if (savedAreas.length === 0) {
+                    Alert.alert("Please highlight area you want");
                   } else {
-                    console.log(savedAreas)
-                    setFirstProcedure(false)
-                    setSecondProcedure(true)
+                    console.log(savedAreas);
+                    setFirstProcedure(false);
+                    setSecondProcedure(true);
                   }
                 }
               }
@@ -273,7 +273,7 @@ export default function UploadPage() {
           </View>
         </View>
       </>
-    )
+    );
   } else if (secondProcedure) {
     return (
       <ScrollView style={styles.container}>
@@ -281,8 +281,8 @@ export default function UploadPage() {
           title='previous'
           onPress={
             () => {
-              setSecondProcedure(false)
-              setFirstProcedure(true)
+              setSecondProcedure(false);
+              setFirstProcedure(true);
             }
           }
         />
@@ -328,7 +328,6 @@ export default function UploadPage() {
                 const name = areaNames[area.id];
                 return name && name.trim().length > 0;
               });
-
               if (!allNamesFilled) {
                 Alert.alert("Please fill in all the names of different areas");
               } else {
@@ -349,9 +348,9 @@ export default function UploadPage() {
           title='previous'
           onPress={
             () => {
-              setThirdProcedure(false)
-              setSecondProcedure(true)
-              console.log(savedAreas)
+              setThirdProcedure(false);
+              setSecondProcedure(true);
+              console.log(savedAreas);
             }
           }
         />
@@ -383,13 +382,16 @@ export default function UploadPage() {
             <Text style={{ color: area.color }}>
               {area.name}
             </Text>
-            <Text style={{ color: 'white' }}>
+            <Text style={styles.canGoToText}>
               Can go to:
-              {savedAreas
-                .filter((otherArea) => area.accessibleNode.includes(otherArea.id))
-                .map((otherArea) => otherArea.name)
-                .join(', ')}
+              <Text style={styles.accessibleAreasText}>
+                {savedAreas
+                  .filter((otherArea) => area.accessibleNode.includes(otherArea.id))
+                  .map((otherArea) => otherArea.name)
+                  .join(', ')}
+              </Text>
             </Text>
+
             <TouchableOpacity
               onPress={() => handleSelectArea(area)}
               style={styles.selectButton}
@@ -399,29 +401,44 @@ export default function UploadPage() {
           </View>
         ))}
 
-        {selectedArea && (
-          <View>
-            <Text style={{ color: 'white' }}>
-              Select areas for {selectedArea.name} to go to:
-            </Text>
-            {savedAreas
-              .filter((area) => area.id !== selectedArea.id)
-              .map((item) => (
-                <TouchableOpacity
-                  key={item.id}
-                  onPress={() => handleToggleAreaToGo(item.id)}
-                  style={styles.checkboxContainer}
-                >
-                  <Text style={{ color: 'white' }}>{item.name}</Text>
-                  {selectedAreasToGo[selectedArea.id] &&
-                    selectedAreasToGo[selectedArea.id].includes(item.id) && (
-                      <Text style={{ color: 'green' }}>&#10004;</Text>
-                    )}
-                </TouchableOpacity>
-              ))}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+          }}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={{ color: 'white' }}>
+                Select areas for {selectedArea?.name} to go to:
+              </Text>
+              {savedAreas
+                .filter((area) => area.id !== selectedArea?.id)
+                .map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => handleToggleAreaToGo(item.id)}
+                    style={styles.checkboxContainer}
+                  >
+                    <Text style={{ color: 'white' }}>{item.name}</Text>
+                    {selectedAreasToGo[selectedArea?.id] &&
+                      selectedAreasToGo[selectedArea?.id].includes(item.id) && (
+                        <Text style={{ color: 'green' }}>&#10004;</Text>
+                      )}
+                  </TouchableOpacity>
+                ))}
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        )}
-        <View style={{marginBottom: 50}}>
+        </Modal>
+        <View style={{ marginBottom: 50 }}>
           <Button
             title='next'
             onPress={() => {
@@ -430,15 +447,14 @@ export default function UploadPage() {
                 if (selectedAreasToGo[nodeId]) {
                   node.accessibleNode = selectedAreasToGo[nodeId];
                 }
-              })
+              });
 
-              setThirdProcedure(false)
-              console.log(selectedAreasToGo)
-              console.log(highlightedAreas)
+              setThirdProcedure(false);
+              console.log(selectedAreasToGo);
+              console.log(highlightedAreas);
             }}
           />
         </View>
-
       </ScrollView>
     );
   } else {
@@ -446,7 +462,7 @@ export default function UploadPage() {
       <Button
         title="previous"
         onPress={() => {
-          setThirdProcedure(true)
+          setThirdProcedure(true);
         }}
       />
       <View style={{ position: 'relative' }}>
@@ -471,77 +487,114 @@ export default function UploadPage() {
           </React.Fragment>
         ))}
       </View>
-      {savedAreas.map((area, index) => (
-        <View key={index} style={{ marginBottom: 20 }}>
-          <Text style={{ color: area.color, fontSize: 18, fontWeight: 'bold' }}>
-            {area.name}
-          </Text>
-          <TouchableOpacity
-            style={{
-              backgroundColor: area.color,
-              paddingVertical: 10,
-              paddingHorizontal: 20,
-              borderRadius: 8,
-              alignItems: 'center',
-            }}
-            onPress={() => {
-              // Your button press handler here
-              console.log(`Upload video for ${area.name}`);
-            }}
-          >
-            <Text style={{ color: 'white', fontSize: 16 }}>Upload</Text>
-          </TouchableOpacity>
-        </View>
-      ))}
+{savedAreas.map((area, index) => (
+  <View key={index} style={{ marginBottom: 20 }}>
+    <Text style={{ color: area.color, fontSize: 18, fontWeight: 'bold' }}>
+      {area.name}
+    </Text>
+    <TouchableOpacity
+      style={{
+        backgroundColor: area.color,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
+      }}
+      onPress={() => {
+        // Your button press handler here
+        console.log(`Upload video for ${area.name}`);
+      }}
+    >
+      <Text style={{ color: 'white', fontSize: 16 }}>Upload</Text>
+    </TouchableOpacity>
+  </View>
+))}
 
-      <Button
-        title='Done'
-        onPress={() => {
-          if (uploadSuccess == false) {
-            {
-              Alert.alert("please upload video for each of the area")
-            }
-          } else {
-            console.log("areaNames is: ")
-            // console.log(areaNames)
-            console.log("highlightedAreas are: ")
-            console.log(highlightedAreas)
-            setUplaodSuccess(true)
-          }
-        }}
-      />
-      {uploadSuccess && 
-      <Text style={{ color: 'white', padding: 10, marginBottom: 50 }}>
-        Successfully Upload, Once the model is trained, we will send you a email!
-      </Text>}
-    </ScrollView>
+<Button
+  title='Done'
+  onPress={() => {
+    if (uploadSuccess == false) {
+      {
+        Alert.alert("please upload video for each of the area")
+      }
+    } else {
+      console.log("areaNames is: ")
+      // console.log(areaNames)
+      console.log("highlightedAreas are: ")
+      console.log(highlightedAreas)
+      setUplaodSuccess(true)
+    }
+  }}
+/>
+{uploadSuccess && 
+<Text style={{ color: 'white', padding: 10, marginBottom: 50 }}>
+  Successfully Upload, Once the model is trained, we will send you a email!
+</Text>}
+</ScrollView>
   }
 }
 
 const styles = StyleSheet.create({
   container: {
     top: 30,
-    padding: 20, // Optional padding for better readability
+    padding: 20,
+    flex: 1,
+    backgroundColor: 'black',
   },
   highlight: {
     position: 'absolute',
     borderWidth: 2,
   },
+  canGoToText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 5,
+  },
+  accessibleAreasText: {
+    fontWeight: 'normal',
+    color: '#a0d468',  // A shade of green, adjust as needed
+  },
+  selectButton: {
+    marginTop: 10,
+    backgroundColor: '#1e90ff',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  selectButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
   checkboxContainer: {
     padding: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#444',
   },
-  selectButton: {
-    backgroundColor: '#007AFF',  // iOS blue color
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    marginTop: 6,
-    alignSelf: 'flex-start', // so button width fits content
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
   },
-  selectButtonText: {
+  modalContent: {
+    backgroundColor: '#333',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: '#555',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  closeButtonText: {
     color: 'white',
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
 });

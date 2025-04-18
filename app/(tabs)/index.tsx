@@ -47,7 +47,7 @@ export default function HomeScreen() {
         </ThemedText>
       </Collapsible>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Who we are</ThemedText>
+        <ThemedText type="subtitle">Who are we?</ThemedText>
         <ThemedText>
           <ThemedText type="defaultSemiBold">We are Richard and Michael! This is our fyp project</ThemedText>.
         </ThemedText>
