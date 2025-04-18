@@ -190,86 +190,90 @@ export default function UploadPage() {
     return (
       <>
         <View style={styles.container}>
-          <Button title="Upload Photo" onPress={openImagePicker} />
-          <Button title="Save Highlighted Areas" onPress={saveHighlightedAreas} />
-          <Button title="Clear Saved Areas" onPress={clearSavedAreas} />
-          {selectedImage && (
-            <View style={{ position: 'relative' }}>
-              <Image
-                source={{ uri: selectedImage }}
-                style={{ width: 350, height: 200 }}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-              />
-              {isHighlighting && (
-                <View
-                  style={[
-                    styles.highlight,
-                    {
-                      left: Math.min(startX, endX),
-                      top: Math.min(startY, endY),
-                      width: Math.abs(endX - startX),
-                      height: Math.abs(endY - startY),
-                      borderColor: getRandomColor(), // Use a random color for the current highlight
-                    },
-                  ]}
+          <View style={{ top: 20 }}>
+
+            <Button title="Upload Photo" onPress={openImagePicker} />
+            <Button title="Save Highlighted Areas" onPress={saveHighlightedAreas} />
+            <Button title="Clear Saved Areas" onPress={clearSavedAreas} />
+            {selectedImage && (
+              <View style={{ position: 'relative' }}>
+                <Image
+                  source={{ uri: selectedImage }}
+                  style={{ width: 350, height: 200 }}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                 />
-              )}
-              {highlightedAreas.map((area, index) => (
-                <React.Fragment key={index}>
+                {isHighlighting && (
                   <View
                     style={[
                       styles.highlight,
                       {
-                        left: area.x,
-                        top: area.y,
-                        width: area.width,
-                        height: area.height,
-                        borderColor: area.color, // Use the saved color for each area
+                        left: Math.min(startX, endX),
+                        top: Math.min(startY, endY),
+                        width: Math.abs(endX - startX),
+                        height: Math.abs(endY - startY),
+                        borderColor: getRandomColor(), // Use a random color for the current highlight
                       },
                     ]}
                   />
-                </React.Fragment>
-              ))}
-            </View>
-          )}
-          {savedAreas && <Text style={{ color: 'white' }}>
-            Number of highlighted area: {usedColors.size}
-          </Text>}
-          {
-            selectedImage &&
-            <View>
-              <Text style={{ color: 'white' }}>What is the orientation if pointing upward: {orientation}</Text>
-              <Slider
-                minimumValue={0}
-                maximumValue={359}
-                step={1}
-                value={orientation}
-                onValueChange={handleOrientationChange}
-                minimumTrackTintColor="#007AFF"
-                maximumTrackTintColor="#f5f5f5"
-              />
-              <Text style={{ color: 'white' }}> 0 is North; 90 is East; 180 is South and 270 is West</Text>
-            </View>
-          }
-          <View style={{ marginBottom: 50 }}>
-            <Button
-              title='Next'
-              onPress={
-                () => {
-                  if (!selectedImage) {
-                    Alert.alert("Please upload the image");
-                  } else if (savedAreas.length === 0) {
-                    Alert.alert("Please highlight area you want");
-                  } else {
-                    console.log(savedAreas);
-                    setFirstProcedure(false);
-                    setSecondProcedure(true);
+                )}
+                {highlightedAreas.map((area, index) => (
+                  <React.Fragment key={index}>
+                    <View
+                      style={[
+                        styles.highlight,
+                        {
+                          left: area.x,
+                          top: area.y,
+                          width: area.width,
+                          height: area.height,
+                          borderColor: area.color, // Use the saved color for each area
+                        },
+                      ]}
+                    />
+                  </React.Fragment>
+                ))}
+              </View>
+            )}
+            {savedAreas && <Text style={{ color: 'white' }}>
+              Number of highlighted area: {usedColors.size}
+            </Text>}
+            {
+              selectedImage &&
+              <View>
+                <Text style={{ color: 'white' }}>What is the orientation if pointing upward: {orientation}</Text>
+                <Slider
+                  minimumValue={0}
+                  maximumValue={359}
+                  step={1}
+                  value={orientation}
+                  onValueChange={handleOrientationChange}
+                  minimumTrackTintColor="#007AFF"
+                  maximumTrackTintColor="#f5f5f5"
+                />
+                <Text style={{ color: 'white' }}> 0 is North; 90 is East; 180 is South and 270 is West</Text>
+              </View>
+            }
+            <View style={{ marginBottom: 50 }}>
+              <Button
+                title='Next'
+                onPress={
+                  () => {
+                    if (!selectedImage) {
+                      Alert.alert("Please upload the image");
+                    } else if (savedAreas.length === 0) {
+                      Alert.alert("Please highlight area you want");
+                    } else {
+                      console.log(savedAreas);
+                      setFirstProcedure(false);
+                      setSecondProcedure(true);
+                    }
                   }
                 }
-              }
-            />
+              />
+            </View>
+
           </View>
         </View>
       </>
@@ -487,56 +491,56 @@ export default function UploadPage() {
           </React.Fragment>
         ))}
       </View>
-{savedAreas.map((area, index) => (
-  <View key={index} style={{ marginBottom: 20 }}>
-    <Text style={{ color: area.color, fontSize: 18, fontWeight: 'bold' }}>
-      {area.name}
-    </Text>
-    <TouchableOpacity
-      style={{
-        backgroundColor: area.color,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        alignItems: 'center',
-      }}
-      onPress={() => {
-        // Your button press handler here
-        console.log(`Upload video for ${area.name}`);
-      }}
-    >
-      <Text style={{ color: 'white', fontSize: 16 }}>Upload</Text>
-    </TouchableOpacity>
-  </View>
-))}
+      {savedAreas.map((area, index) => (
+        <View key={index} style={{ marginBottom: 20 }}>
+          <Text style={{ color: area.color, fontSize: 18, fontWeight: 'bold' }}>
+            {area.name}
+          </Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor: area.color,
+              paddingVertical: 10,
+              paddingHorizontal: 20,
+              borderRadius: 8,
+              alignItems: 'center',
+            }}
+            onPress={() => {
+              // Your button press handler here
+              console.log(`Upload video for ${area.name}`);
+            }}
+          >
+            <Text style={{ color: 'white', fontSize: 16 }}>Upload</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
 
-<Button
-  title='Done'
-  onPress={() => {
-    if (uploadSuccess == false) {
-      {
-        Alert.alert("please upload video for each of the area")
-      }
-    } else {
-      console.log("areaNames is: ")
-      // console.log(areaNames)
-      console.log("highlightedAreas are: ")
-      console.log(highlightedAreas)
-      setUplaodSuccess(true)
-    }
-  }}
-/>
-{uploadSuccess && 
-<Text style={{ color: 'white', padding: 10, marginBottom: 50 }}>
-  Successfully Upload, Once the model is trained, we will send you a email!
-</Text>}
-</ScrollView>
+      <Button
+        title='Done'
+        onPress={() => {
+          if (uploadSuccess == false) {
+            {
+              Alert.alert("please upload video for each of the area")
+            }
+          } else {
+            console.log("areaNames is: ")
+            // console.log(areaNames)
+            console.log("highlightedAreas are: ")
+            console.log(highlightedAreas)
+            setUplaodSuccess(true)
+          }
+        }}
+      />
+      {uploadSuccess &&
+        <Text style={{ color: 'white', padding: 10, marginBottom: 50 }}>
+          Successfully Upload, Once the model is trained, we will send you a email!
+        </Text>}
+    </ScrollView>
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-    top: 30,
+    // top: 30,
     padding: 20,
     flex: 1,
     backgroundColor: 'black',

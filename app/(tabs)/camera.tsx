@@ -1,4 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+
+import 'react-native-get-random-values';
+import 'react-native-url-polyfill/auto'; // Import polyfills first
 import {
   View,
   Button,
@@ -15,6 +18,8 @@ import Compass from '../../components/Compass';
 import floorplan from '../../image/floorplan.jpg';
 import { AntDesign } from '@expo/vector-icons';
 import { UploadS3 } from '@/components/UploadS3'; // adjust path as needed
+import ImageDetect from '@/api/imageDetect';
+
 
 const savedHighlightedArea = [{"accessibleNode": [7, 5, 4], "color": "#34B3BB", "height": 78, "id": 0, "name": "Bedroom1", "width": 56.66667175292969, "x": 24.333328247070312, "y": 66.33332824707031}, {"accessibleNode": [5, 6], "color": "#6C0D94", "height": 52.333343505859375, "id": 1, "name": "Bedroom2", "width": 40, "x": 92.33332824707031, "y": 89.66665649414062}, {"accessibleNode": [3, 5, 7], "color": "#FD0373", "height": 45, "id": 2, "name": "Kitchen", "width": 33, "x": 119.66665649414062, "y": 2}, {"accessibleNode": [0, 1], "color": "#A634A4", "height": 38.33332824707031, "id": 3, "name": "Living room", "width": 33.333343505859375, "x": 77.66665649414062, "y": 5}, {"accessibleNode": [0, 2], "color": "#319398", "height": 46, "id": 4, "name": "entry", "width": 29.333328247070312, "x": 29, "y": 6}, {"accessibleNode": [1, 2], "color": "#EDCA97", "height": 102, "id": 5, "name": "Dining room", "width": 40.33332824707031, "x": 168, "y": 44.33332824707031}, {"accessibleNode": [1, 3], "color": "#8DEEBD", "height": 47, "id": 6, "name": "Room", "width": 97, "x": 116.33332824707031, "y": 152.3333282470703}, {"accessibleNode": [3, 5, 4], "color": "#3A013C", "height": 60.666656494140625, "id": 7, "name": "Toilet", "width": 41, "x": 216.3333282470703, "y": 83}, {"accessibleNode": [5], "color": "#EC14D6", "height": 121, "id": 8, "name": "Room2", "width": 54, "x": 264.3333282470703, "y": 28}];
 
@@ -76,12 +81,8 @@ export default function Camera() {
         const fileUri = takenPhoto.uri;
         const fileName = 'testing_image/testingPhoto.jpg';  // Specify the desired file name in S3
         UploadS3(fileUri, 'fyp-final', fileName)
-          .then(result => {
-            console.log('Upload successful:', result);
-          })
-          .catch(error => {
-            console.error('Upload failed:', error);
-          });
+        console.log("Image detecting")
+        ImageDetect("","","","")
       }
     }
   };
