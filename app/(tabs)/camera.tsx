@@ -12,6 +12,7 @@ import {
   Dimensions,
   ScrollView,
   Animated,
+  ActivityIndicator
 } from 'react-native';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import Compass from '../../components/Compass';
@@ -19,9 +20,10 @@ import floorplan from '../../image/floorplan.jpg';
 import { AntDesign } from '@expo/vector-icons';
 import { UploadS3 } from '@/components/UploadS3'; // adjust path as needed
 import ImageDetect from '@/api/imageDetect';
+import ShortestPathFinder, { findShortestPath } from '@/components/Path';
 
 
-const savedHighlightedArea = [{"accessibleNode": [7, 5, 4], "color": "#34B3BB", "height": 78, "id": 0, "name": "Bedroom1", "width": 56.66667175292969, "x": 24.333328247070312, "y": 66.33332824707031}, {"accessibleNode": [5, 6], "color": "#6C0D94", "height": 52.333343505859375, "id": 1, "name": "Bedroom2", "width": 40, "x": 92.33332824707031, "y": 89.66665649414062}, {"accessibleNode": [3, 5, 7], "color": "#FD0373", "height": 45, "id": 2, "name": "Kitchen", "width": 33, "x": 119.66665649414062, "y": 2}, {"accessibleNode": [0, 1], "color": "#A634A4", "height": 38.33332824707031, "id": 3, "name": "Living room", "width": 33.333343505859375, "x": 77.66665649414062, "y": 5}, {"accessibleNode": [0, 2], "color": "#319398", "height": 46, "id": 4, "name": "entry", "width": 29.333328247070312, "x": 29, "y": 6}, {"accessibleNode": [1, 2], "color": "#EDCA97", "height": 102, "id": 5, "name": "Dining room", "width": 40.33332824707031, "x": 168, "y": 44.33332824707031}, {"accessibleNode": [1, 3], "color": "#8DEEBD", "height": 47, "id": 6, "name": "Room", "width": 97, "x": 116.33332824707031, "y": 152.3333282470703}, {"accessibleNode": [3, 5, 4], "color": "#3A013C", "height": 60.666656494140625, "id": 7, "name": "Toilet", "width": 41, "x": 216.3333282470703, "y": 83}, {"accessibleNode": [5], "color": "#EC14D6", "height": 121, "id": 8, "name": "Room2", "width": 54, "x": 264.3333282470703, "y": 28}];
+const savedHighlightedArea = [{ "accessibleNode": [1, 15, 7], "color": "#09D7FB", "height": 62.666656494140625, "id": 0, "name": "A", "width": 73.66667175292969, "x": 148.3333282470703, "y": 89 }, { "accessibleNode": [0, 2, 16], "color": "#82A59E", "height": 55, "id": 1, "name": "B", "width": 89.66667175292969, "x": 226.3333282470703, "y": 88.33332824707031 }, { "accessibleNode": [1], "color": "#B4F8A0", "height": 47.66667175292969, "id": 2, "name": "C", "width": 48, "x": 265.3333282470703, "y": 36.666656494140625 }, { "accessibleNode": [7], "color": "#7497C3", "height": 36.666656494140625, "id": 3, "name": "D", "width": 49, "x": 209.3333282470703, "y": 35 }, { "accessibleNode": [13, 10], "color": "#D68044", "height": 25, "id": 4, "name": "E", "width": 33, "x": 286.6666564941406, "y": 3.3333282470703125 }, { "accessibleNode": [8, 10, 13], "color": "#E5787F", "height": 20, "id": 5, "name": "F", "width": 49.33332824707031, "x": 234, "y": 6 }, { "accessibleNode": [9, 12, 15], "color": "#B33AF0", "height": 22.333343505859375, "id": 6, "name": "G", "width": 48, "x": 171, "y": 4.666656494140625 }, { "accessibleNode": [1, 2, 6], "color": "#8B6193", "height": 49.666656494140625, "id": 7, "name": "H", "width": 37.33332824707031, "x": 170, "y": 35 }, { "accessibleNode": [13, 14, 16, 9], "color": "#8D7549", "height": 27.666671752929688, "id": 8, "name": "I", "width": 76.66665649414062, "x": 86, "y": 58.666656494140625 }, { "accessibleNode": [0, 2, 5, 14], "color": "#295D74", "height": 49.66667175292969, "id": 9, "name": "J", "width": 48.66667175292969, "x": 111.33332824707031, "y": 3.3333282470703125 }, { "accessibleNode": [9, 13, 14, 7], "color": "#E2A8F0", "height": 37.33332824707031, "id": 10, "name": "K", "width": 39.333343505859375, "x": 66.66665649414062, "y": 10.333328247070312 }, { "accessibleNode": [4, 10, 12, 15], "color": "#D9BF0B", "height": 37, "id": 11, "name": "L", "width": 28.333328247070312, "x": 29.333328247070312, "y": 9 }, { "accessibleNode": [4, 10, 11, 14], "color": "#92B5D1", "height": 87.66667175292969, "id": 12, "name": "M", "width": 51, "x": 24.333328247070312, "y": 57.666656494140625 }, { "accessibleNode": [10, 14, 6], "color": "#BB3075", "height": 39, "id": 13, "name": "N", "width": 84, "x": 19.666656494140625, "y": 154.66665649414062 }, { "accessibleNode": [2, 12, 15], "color": "#31261E", "height": 57, "id": 14, "name": "O", "width": 52.66667175292969, "x": 84.66665649414062, "y": 89 }, { "accessibleNode": [6, 9], "color": "#0A907A", "height": 36.333343505859375, "id": 15, "name": "P", "width": 95.33332824707031, "x": 118, "y": 159.66665649414062 }, { "accessibleNode": [9, 12, 14, 15], "color": "#0652C4", "height": 43, "id": 16, "name": "Q", "width": 92.33332824707031, "x": 228.3333282470703, "y": 154 }]
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -33,8 +35,8 @@ export default function Camera() {
   const [iImageMSmaller, setiImageSmaller] = useState(true);
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [scanedResult, setScanedResult] = useState(0); 
-  
+  const [scanedResult, setScanedResult] = useState(-1);
+  const [isLoading, setIsLoading] = useState(false)
   const slideAnim = useRef(new Animated.Value(-screenHeight)).current;
 
   useEffect(() => {
@@ -70,19 +72,33 @@ export default function Camera() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
 
+  const model = "arn:aws:rekognition:us-east-1:354392660622:project/fyp/version/fyp.2025-04-16T14.57.26/1744786647466"
+  const bucket = 'fyp-final'
+  const testingPhoto = 'testing_image/testingPhoto.jpg'
+  const min_confidence = 40
+
   const handleTakePhoto = async () => {
     if (cameraRef.current) {
       const options = { quality: 1, base64: true, exif: false };
       const takenPhoto = await cameraRef.current.takePictureAsync(options);
       setPhoto(takenPhoto);
-      console.log("tesiing")
       // Upload the taken photo
       if (takenPhoto) {
         const fileUri = takenPhoto.uri;
         const fileName = 'testing_image/testingPhoto.jpg';  // Specify the desired file name in S3
-        UploadS3(fileUri, 'fyp-final', fileName)
-        console.log("Image detecting")
-        ImageDetect("","","","")
+        try {
+          setIsLoading(true)
+          await UploadS3(fileUri, 'fyp-final', fileName);
+          const scanResult = await ImageDetect(model, bucket, testingPhoto, min_confidence);
+          console.log('scanResult is:')
+          console.log(scanResult)
+          setScanedResult(
+            savedHighlightedArea.find(item => item.name === scanResult?.label)?.id ?? -1
+          );
+          setIsLoading(false)
+        } catch (error) {
+          console.error("Error uploading to S3:", error);
+        }
       }
     }
   };
@@ -93,10 +109,10 @@ export default function Camera() {
   };
 
   const handleNodeSelection = (node: any) => {
-    if(selectedNode == node) {
+    if (selectedNode == node) {
       setSelectedNode(null)
     } else {
-    setSelectedNode(node);
+      setSelectedNode(node);
     }
     console.log(`Selected Node: ${node.name}`);
   };
@@ -111,19 +127,27 @@ export default function Camera() {
     zIndex: iImageMSmaller ? 20 : 10,
   };
 
-  const filteredSavedHighlightedArea = (savedHighlightedArea: any[], id: number | undefined, id2: number | undefined) => {
+  const filteredSavedHighlightedArea = (savedHighlightedArea: any[], id?: number, id2?: number) => {
     if (id === undefined && id2 === undefined) {
       return [];
     }
-
-    return savedHighlightedArea.filter((area: any) => area.id === id || area.id === id2);
+  
+    const path = findShortestPath(savedHighlightedArea, id || 0, id2 || 0);
+  
+    if (path && path.length > 0) {
+      // Return all nodes whose id is in the path array
+      return savedHighlightedArea.filter(area => path.includes(area.id));
+    }
+  
+    // If no path found, fallback: return nodes matching id or id2
+    return savedHighlightedArea.filter(area => area.id === id || area.id === id2);
   };
-
+  
   const chosenId = selectedNode ? selectedNode.id : undefined;
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef} zoom = {0.01}>
+      <CameraView style={styles.camera} facing={facing} ref={cameraRef} zoom={0.01}>
         <View style={styles.compassContainer}>
           <Compass />
         </View>
@@ -167,6 +191,17 @@ export default function Camera() {
             <AntDesign name="camera" size={44} color="black" />
           </TouchableOpacity>
         </View>
+        {isLoading &&
+          <ActivityIndicator
+            size="large"
+            color="black"
+            style={{
+              flex: 1,                   // Take full screen height
+              justifyContent: 'center',  // Center vertically
+              alignItems: 'center',
+            }}
+          />
+          }
       </CameraView>
 
       <Animated.View
@@ -180,15 +215,23 @@ export default function Camera() {
       >
         <View style={styles.overlayHeader}>
           <Text style={styles.overlayTitle}>Currently you are at:</Text>
-          <Text style={{ color: savedHighlightedArea[scanedResult].color }}>
-            {savedHighlightedArea[scanedResult].name}
-          </Text>
+          {
+            scanedResult !== -1 ? (
+              <Text style={{ color: savedHighlightedArea[scanedResult].color }}>
+                {savedHighlightedArea[scanedResult].name}
+              </Text>
+            ) : (
+              <Text>
+                Please scan again
+              </Text>
+            )
+          }
           <TouchableOpacity onPress={() => setIsSearching(false)}>
             <AntDesign name="closecircle" size={30} color="black" />
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.nodeList}>
+        <ScrollView style={styles.nodeList} contentContainerStyle={{ paddingBottom: 30 }}>
           <View style={containerStyle} style={{ width: 350, height: 200 }}>
             <Image source={floorplan} style={{ width: 350, height: 200 }} />
 
@@ -227,8 +270,14 @@ export default function Camera() {
                 <Text style={styles.nodeName}>{node.name || `Node ${node.id}`}</Text>
               </TouchableOpacity>
             ))}
+
         </ScrollView>
 
+        <ShortestPathFinder 
+            savedHighlightedArea={savedHighlightedArea} 
+            startId={scanedResult} 
+            endId={selectedNode?.id} 
+          />
         {/* {photo && (
           <View style={styles.photoPreview}>
             <Text style={{ marginBottom: 5 }}>Photo Preview:</Text>
@@ -275,6 +324,7 @@ const styles = StyleSheet.create({
     left: 10,
     flexDirection: 'column',
     zIndex: 1,
+    
   },
   overlay: {
     position: 'absolute',
@@ -299,7 +349,9 @@ const styles = StyleSheet.create({
   },
   nodeList: {
     top: 30,
-    maxHeight: screenHeight * 0.8,
+    maxHeight: screenHeight * 0.78,
+    flexGrow: 1,
+
   },
   nodeButton: {
     backgroundColor: '#ccc',
