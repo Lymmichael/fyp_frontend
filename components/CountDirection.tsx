@@ -41,6 +41,7 @@ interface Node {
     }
     console.log(angleInDegrees)
     return angleInDegrees;
+    //default 0 degree right side N
   };
   
   export default CalculateOrientation;

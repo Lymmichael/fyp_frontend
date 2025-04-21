@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Button, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, Button, Image, ScrollView, ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, Alert, Modal } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import Slider from '@react-native-community/slider';
@@ -7,7 +7,7 @@ import LoginPage from '../../components/Login';
 import * as DocumentPicker from 'expo-document-picker';
 
 export default function UploadPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [orientation, setOrientation] = useState(0);
   const [startX, setStartX] = useState(0);
@@ -19,17 +19,16 @@ export default function UploadPage() {
   const [savedAreas, setSavedAreas] = useState([]);
   const [usedColors, setUsedColors] = useState(new Set()); // Set to store unique colors
   const [uploadedVideos, setUploadedVideos] = useState({}); // Object to store uploaded videos for each area
-  const [firstProcedure, setFirstProcedure] = useState(true);
-  const [secondProcedure, setSecondProcedure] = useState(false);
-  const [thirdProcedure, setThirdProcedure] = useState(false);
+  const [procedure, setProcedure] = useState(0)
   const [areaNames, setAreaNames] = useState({});
   const [selectedArea, setSelectedArea] = useState(null);
   const [selectedAreasToGo, setSelectedAreasToGo] = useState({});
-  const [uploadSuccess, setUplaodSuccess] = useState(true);
+  const [uploadSuccess, setUplaodSuccess] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
 
-  if (!isLogin) {
-    return (<LoginPage />);
+	if (!isLogin) {
+    return (<LoginPage onLoginSuccess={() => setIsLogin(true)} />);
   }
   const openImagePicker = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -88,6 +87,13 @@ export default function UploadPage() {
     setSavedAreas(highlightedAreas);
     console.log(savedAreas);
   };
+
+  const undo = () => {
+      setHighlightedAreas((prevAreas) => {
+        if (prevAreas.length === 0) return prevAreas; // nothing to remove
+        return prevAreas.slice(0, prevAreas.length - 1);
+      });
+  }
 
   const clearSavedAreas = () => {
     setSavedAreas([]);
@@ -222,7 +228,7 @@ export default function UploadPage() {
     }
   };
 
-  if (firstProcedure) {
+  if (procedure == 0) {
     return (
       <>
         <View style={styles.container}>
@@ -231,6 +237,11 @@ export default function UploadPage() {
             <Button title="Upload Photo" onPress={openImagePicker} />
             <Button title="Save Highlighted Areas" onPress={saveHighlightedAreas} />
             <Button title="Clear Saved Areas" onPress={clearSavedAreas} />
+            {selectedArea &&
+              <Button title="Undo" onPress={undo} />
+            }
+            
+            {/* <Button title="Undo" onPress={} /> */}
             {selectedImage && (
               <View style={{ position: 'relative' }}>
                 <Image
@@ -273,7 +284,7 @@ export default function UploadPage() {
               </View>
             )}
             {savedAreas && <Text style={{ color: 'white' }}>
-              Number of highlighted area: {usedColors.size}
+              Number of highlighted area: {savedAreas.length}
             </Text>}
             {
               selectedImage &&
@@ -302,8 +313,7 @@ export default function UploadPage() {
                       Alert.alert("Please highlight area you want");
                     } else {
                       console.log(savedAreas);
-                      setFirstProcedure(false);
-                      setSecondProcedure(true);
+                      setProcedure(1)
                     }
                   }
                 }
@@ -314,7 +324,7 @@ export default function UploadPage() {
         </View>
       </>
     );
-  } else if (secondProcedure) {
+  } else if (procedure == 1) {
     return (
       <ScrollView style={styles.container}>
         <View style={{ top: 20 }}>
@@ -323,8 +333,7 @@ export default function UploadPage() {
             title='previous'
             onPress={
               () => {
-                setSecondProcedure(false);
-                setFirstProcedure(true);
+                setProcedure(1)
               }
             }
           />
@@ -381,8 +390,7 @@ export default function UploadPage() {
                   Alert.alert("Please fill in all the names of different areas");
                 } else {
                   updateAreaNames();
-                  setSecondProcedure(false);
-                  setThirdProcedure(true);
+                  setProcedure(2)
                 }
               }}
             />
@@ -392,7 +400,7 @@ export default function UploadPage() {
         </View>
       </ScrollView>
     );
-  } else if (thirdProcedure) {
+  } else if (procedure == 2) {
     return (
       <ScrollView style={styles.container}>
         <View style={{ top: 20 }}>
@@ -401,8 +409,7 @@ export default function UploadPage() {
             title='previous'
             onPress={
               () => {
-                setThirdProcedure(false);
-                setSecondProcedure(true);
+                setProcedure(1)
                 console.log(savedAreas);
               }
             }
@@ -502,7 +509,7 @@ export default function UploadPage() {
                   }
                 });
 
-                setThirdProcedure(false);
+                setProcedure(3)
                 console.log(selectedAreasToGo);
                 console.log(highlightedAreas);
               }}
@@ -518,8 +525,8 @@ export default function UploadPage() {
         <Button
           title="previous"
           onPress={() => {
-            setThirdProcedure(true);
-          }}
+            setProcedure(2)
+        }}
         />
         <View style={{ position: 'relative' }}>
           <Image
@@ -569,19 +576,29 @@ export default function UploadPage() {
         <Button
           title='Done'
           onPress={() => {
-            if (uploadSuccess == false) {
-              {
-                Alert.alert("please upload video for each of the area")
-              }
-            } else {
-              console.log("areaNames is: ")
-              // console.log(areaNames)
-              console.log("highlightedAreas are: ")
-              console.log(highlightedAreas)
-              setUplaodSuccess(true)
-            }
-          }}
+						if (uploadSuccess == true) {
+							Alert.alert("You have uploaded all videos")
+						} else {
+            setIsLoading(true);
+            setTimeout(() => {
+                setIsLoading(false);
+								setUplaodSuccess(true)
+                Alert.alert("Upload Successful")
+            }, 10000);
+          	}
+					}}
         />
+        {isLoading &&
+          <ActivityIndicator
+            size="large"
+            color="white"
+            style={{
+              flex: 1,                   // Take full screen height
+              justifyContent: 'center',  // Center vertically
+              alignItems: 'center',
+            }}
+          />
+        }
         {uploadSuccess &&
           <Text style={{ color: 'white', padding: 10, marginBottom: 50 }}>
             Successfully Upload, Once the model is trained, we will send you a email!

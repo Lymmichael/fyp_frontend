@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 
 interface Node {
   id: number;
@@ -59,6 +59,11 @@ const ShortestPathFinder: React.FC<ShortestPathFinderProps> = ({
       <Text style={styles.pathPhrase}>Shortest Path: </Text>
 
       {path ? (
+        <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={true} 
+        contentContainerStyle={styles.scrollContent}
+        >
         <Text style={styles.pathPhrase}>
           {path.map((id, index) => {
             const node = savedHighlightedArea.find(n => n.id === id);
@@ -74,6 +79,9 @@ const ShortestPathFinder: React.FC<ShortestPathFinderProps> = ({
             );
           })}
         </Text>
+          
+        </ScrollView>
+        
       ) : (
         <Text style={styles.pathPhrase}>No path found.</Text>
       )}
@@ -98,12 +106,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 5,
+    flexDirection: 'row',
   },
   pathPhrase: {
     fontSize: 14,
     color: '#000',
     textAlign: 'center',
   },
+  scrollContent: {
+    alignItems: 'center',
+  }
 });
 
 export default ShortestPathFinder;

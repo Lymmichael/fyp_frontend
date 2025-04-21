@@ -17,14 +17,195 @@ import {
 } from 'react-native';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import Compass from '../../components/Compass';
-import floorplan from '../../image/floorplan.jpg';
+import floorplan from '../../image/gine_10F_floorplan.png';
 import { AntDesign } from '@expo/vector-icons';
 import { UploadS3 } from '@/components/UploadS3'; // adjust path as needed
 import ImageDetect from '@/api/imageDetect';
 import ShortestPathFinder, { findShortestPath } from '@/components/Path';
 import CalculateOrientation from '@/components/CountDirection';
 
-const savedHighlightedArea = [{ "accessibleNode": [6], "color": "#0B886B", "height": 47, "id": 0, "name": "A", "width": 46.33332824707031, "x": 14.333328247070312, "y": 5.666656494140625 }, { "accessibleNode": [7], "color": "#FA3D6A", "height": 41, "id": 1, "name": "B", "width": 42.333343505859375, "x": 67.66665649414062, "y": 10 }, { "accessibleNode": [7], "color": "#F82BCF", "height": 47.66667175292969, "id": 2, "name": "C", "width": 30.333328247070312, "x": 119, "y": 5.666656494140625 }, { "accessibleNode": [9, 4], "color": "#1092D6", "height": 17, "id": 3, "name": "D", "width": 50.666656494140625, "x": 171, "y": 8.333328247070312 }, { "accessibleNode": [3, 5], "color": "#7E3BC4", "height": 28.333343505859375, "id": 4, "name": "E", "width": 43.33332824707031, "x": 234.3333282470703, "y": 0.666656494140625 }, { "accessibleNode": [4], "color": "#EFFC80", "height": 24.333328247070312, "id": 5, "name": "F", "width": 22.333328247070312, "x": 296, "y": 2.3333282470703125 }, { "accessibleNode": [0, 7, 16], "color": "#DC982A", "height": 88, "id": 6, "name": "G", "width": 50.33332824707031, "x": 25.333328247070312, "y": 53.666656494140625 }, { "accessibleNode": [1, 2, 6, 8, 9], "color": "#219C23", "height": 31, "id": 7, "name": "H", "width": 76, "x": 84.33332824707031, "y": 55.666656494140625 }, { "accessibleNode": [7, 16], "color": "#CBFB71", "height": 48.666656494140625, "id": 8, "name": "I", "width": 51.666656494140625, "x": 84, "y": 94 }, { "accessibleNode": [3, 7, 10, 12], "color": "#D96283", "height": 55.333343505859375, "id": 9, "name": "J", "width": 38.33332824707031, "x": 169.3333282470703, "y": 30.666656494140625 }, { "accessibleNode": [9], "color": "#01DA46", "height": 38.333343505859375, "id": 10, "name": "K", "width": 41.33332824707031, "x": 217, "y": 35.666656494140625 }, { "accessibleNode": [13], "color": "#288051", "height": 54.333343505859375, "id": 11, "name": "L", "width": 44, "x": 264.6666564941406, "y": 30.666656494140625 }, { "accessibleNode": [9, 15, 13], "color": "#C6AF27", "height": 55.66667175292969, "id": 12, "name": "M", "width": 74, "x": 142.66665649414062, "y": 91.33332824707031 }, { "accessibleNode": [11, 14, 12], "color": "#EEACFF", "height": 54.33332824707031, "id": 13, "name": "N", "width": 97.66667175292969, "x": 218.66665649414062, "y": 89 }, { "accessibleNode": [13], "color": "#EDA0B2", "height": 38.66667175292969, "id": 14, "name": "O", "width": 100, "x": 220, "y": 157.3333282470703 }, { "accessibleNode": [12, 16], "color": "#451636", "height": 44, "id": 15, "name": "P", "width": 95.66665649414062, "x": 112, "y": 152.3333282470703 }, { "accessibleNode": [6, 8, 15], "color": "#679BD4", "height": 35.66667175292969, "id": 16, "name": "Q", "width": 84.33332824707031, "x": 18.333328247070312, "y": 161.66665649414062 }]
+const savedHighlightedArea = [
+  {
+      "accessibleNode": [1],
+      "color": "#751053",
+      "height": 34.33332824707031,
+      "id": 0,
+      "name": "IndustLift",
+      "width": 49,
+      "x": 84.33332824707031,
+      "y": 0.666656494140625
+  },
+  {
+      "accessibleNode": [7, 0, 2],
+      "color": "#3D28A5",
+      "height": 21,
+      "id": 1,
+      "name": "southCorr5",
+      "width": 22.666671752929688,
+      "x": 96.33332824707031,
+      "y": 36.666656494140625
+  },
+  {
+      "accessibleNode": [1, 3],
+      "color": "#EC01CC",
+      "height": 19,
+      "id": 2,
+      "name": "southCorr4",
+      "width": 25.666656494140625,
+      "x": 95,
+      "y": 60.99998474121094
+  },
+  {
+      "accessibleNode": [2, 4],
+      "color": "#64346F",
+      "height": 21.333328247070312,
+      "id": 3,
+      "name": "southCorr3",
+      "width": 21,
+      "x": 98.33332824707031,
+      "y": 83.33332824707031
+  },
+  {
+      "accessibleNode": [5, 3],
+      "color": "#B3F89B",
+      "height": 23,
+      "id": 4,
+      "name": "southCorr2",
+      "width": 21.333328247070312,
+      "x": 98,
+      "y": 103.99998474121094
+  },
+  {
+      "accessibleNode": [6, 4],
+      "color": "#4D882C",
+      "height": 23.666671752929688,
+      "id": 5,
+      "name": "southCorr1",
+      "width": 24,
+      "x": 96,
+      "y": 127.99998474121094
+  },
+  {
+      "accessibleNode": [5],
+      "color": "#FCC78F",
+      "height": 24.666671752929688,
+      "id": 6,
+      "name": "cseDepart",
+      "width": 39.66667175292969,
+      "x": 88.66665649414062,
+      "y": 151.99998474121094
+  },
+  {
+      "accessibleNode": [1, 8],
+      "color": "#090C02",
+      "height": 15,
+      "id": 7,
+      "name": "corr1",
+      "width": 18.666671752929688,
+      "x": 122.33332824707031,
+      "y": 38.99998474121094
+  },
+  {
+      "accessibleNode": [7, 9],
+      "color": "#FFB3A9",
+      "height": 26.666671752929688,
+      "id": 8,
+      "name": "corr2",
+      "width": 23,
+      "x": 146.66665649414062,
+      "y": 32.99998474121094
+  },
+  {
+      "accessibleNode": [8, 10],
+      "color": "#30A462",
+      "height": 27.333343505859375,
+      "id": 9,
+      "name": "corr3",
+      "width": 26,
+      "x": 171,
+      "y": 31.999984741210938
+  },
+  {
+      "accessibleNode": [9, 11],
+      "color": "#6CB917",
+      "height": 32.33332824707031,
+      "id": 10,
+      "name": "corr4",
+      "width": 26.333328247070312,
+      "x": 197,
+      "y": 29.666656494140625
+  },
+  {
+      "accessibleNode": [10, 12],
+      "color": "#A2EFBF",
+      "height": 39.33332824707031,
+      "id": 11,
+      "name": "lift",
+      "width": 39.66667175292969,
+      "x": 223.66665649414062,
+      "y": 22.333328247070312
+  },
+  {
+      "accessibleNode": [11, 13],
+      "color": "#5515F2",
+      "height": 9.666656494140625,
+      "id": 12,
+      "name": "toilet",
+      "width": 34.333343505859375,
+      "x": 225.66665649414062,
+      "y": 67.33332824707031
+  },
+  {
+      "accessibleNode": [12, 14],
+      "color": "#1A18F1",
+      "height": 22.333328247070312,
+      "id": 13,
+      "name": "northCorr1",
+      "width": 38.666656494140625,
+      "x": 224,
+      "y": 83.33332824707031
+  },
+  {
+      "accessibleNode": [13, 15],
+      "color": "#28BA9D",
+      "height": 24,
+      "id": 14,
+      "name": "northCorr2",
+      "width": 53,
+      "x": 216.66665649414062,
+      "y": 103.66665649414062
+  },
+  {
+      "accessibleNode": [14, 16],
+      "color": "#511DB0",
+      "height": 23.333328247070312,
+      "id": 15,
+      "name": "office1",
+      "width": 41,
+      "x": 224.3333282470703,
+      "y": 128.3333282470703
+  },
+  {
+      "accessibleNode": [15, 17],
+      "color": "#D1D5BB",
+      "height": 16.666671752929688,
+      "id": 16,
+      "name": "office2",
+      "width": 51,
+      "x": 221.66665649414062,
+      "y": 155.99998474121094
+  },
+  {
+      "accessibleNode": [16],
+      "color": "#800719",
+      "height": 25,
+      "id": 17,
+      "name": "office3",
+      "width": 42.66667175292969,
+      "x": 222.66665649414062,
+      "y": 174.99998474121094
+  }
+]
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -153,19 +334,19 @@ export default function Camera() {
         <View style={styles.compassContainer}>
           {scanedResult && selectedNode && path.length > 0 && allocationOrder < path.length &&
             <>
-              <Compass direction={
+              <Compass direction={((
                 CalculateOrientation(
                   savedHighlightedArea,
                   path[allocationOrder - 1],
                   path[allocationOrder]
-                )
+                ) || 0) + 0) % 360
               } />
             </>
           }
         </View>
         <View style={containerStyle}>
           <TouchableOpacity onPress={handleFloorPlanClick} activeOpacity={0.8}>
-            <Image source={floorplan} style={{ width: imageWidth, height: imageHeight }} />
+            <Image source={floorplan} style={{resizeMode: 'contain', width: imageWidth, height: imageHeight }} />
           </TouchableOpacity>
 
 
@@ -263,7 +444,13 @@ export default function Camera() {
 
         <ScrollView style={styles.nodeList} contentContainerStyle={{ paddingBottom: 30 }}>
           <View style={containerStyle} style={{ width: 350, height: 200 }}>
-            <Image source={floorplan} style={{ width: 350, height: 200 }} />
+            <Image 
+              source={floorplan} 
+              style={{ 
+                width: 350, 
+                height: 200,
+                resizeMode: 'contain'
+              }} />
 
             {filteredSavedHighlightedArea(savedHighlightedArea, scanedResult, chosenId).map((area) => (
               <View
