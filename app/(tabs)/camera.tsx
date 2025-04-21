@@ -82,7 +82,7 @@ const savedHighlightedArea = [
       "color": "#74C423",
       "height": 47,
       "id": 4,
-      "name": "exhibition ",
+      "name": "exhibition",
       "width": 38.33332824707031,
       "x": 166,
       "y": 97.33332824707031
@@ -115,7 +115,7 @@ export default function Camera() {
   const [isLoading, setIsLoading] = useState(false)
   const slideAnim = useRef(new Animated.Value(-screenHeight)).current;
   const [allocationOrder, setAllocationOrder] = useState<number>(1)
-  const path = findShortestPath(savedHighlightedArea, scanedResult, selectedNode?.id) || []
+  let path = findShortestPath(savedHighlightedArea, scanedResult, selectedNode?.id) || []
 
 
   const [tapCount, setTapCount] = useState(0);
@@ -175,7 +175,9 @@ export default function Camera() {
   const min_confidence = 40
 
   const handleTakePhoto = async () => {
+    // setPath([])
     setAllocationOrder(1)
+    // setScanedResult(-1)
     if (cameraRef.current) {
       const options = { quality: 1, base64: true, exif: false };
       const takenPhoto = await cameraRef.current.takePictureAsync(options);
@@ -243,96 +245,96 @@ export default function Camera() {
   const chosenId = selectedNode ? selectedNode.id : undefined;
   return (
     <View style={styles.container}>
-        <TouchableWithoutFeedback onPress={handleDoubleTap}>
-          <CameraView style={styles.camera} facing={facing} ref={cameraRef} zoom={0.01}>
-            <View style={styles.compassContainer}>
-              {scanedResult && selectedNode && path.length > 0 && allocationOrder < path.length &&
-                <>
-                  <Compass direction={((
-                    CalculateOrientation(
-                      savedHighlightedArea,
-                      path[allocationOrder - 1],
-                      path[allocationOrder]
-                    ) || 0) - 90 + 45 + 180) % 360
-                  } />
-                </>
-              }
-            </View>
-            <View style={containerStyle}>
-              <TouchableOpacity onPress={handleFloorPlanClick} activeOpacity={0.8}>
-                <Image source={floorplan} style={{resizeMode: 'contain', width: imageWidth, height: imageHeight }} />
-              </TouchableOpacity>
-
-
-              {filteredSavedHighlightedArea(savedHighlightedArea, scanedResult, chosenId).map((area) => (
-                <View
-                  key={area.id}
-                  style={[
-                    styles.highlight,
-                    {
-                      left: iImageMSmaller ? area.x / 2 : area.x,
-                      top: iImageMSmaller ? area.y / 2 : area.y,
-                      width: iImageMSmaller ? area.width / 2 : area.width,
-                      height: iImageMSmaller ? area.height / 2 : area.height,
-                      borderColor: area.color,
-                    },
-                  ]}
-                />
-              ))}
-            </View>
-
-            <View style={styles.nodeSelectionContainer}>
-              <TouchableOpacity
-                style={{ padding: 10 }}
-                onPress={() => setIsSearching(true)} // Show overlay on search button press
-              >
-                <AntDesign name="search1" size={30} color="black" />
-              </TouchableOpacity>
-            </View>
-
-            {
-              path.length > 0 && allocationOrder < path.length && (
-                <TouchableOpacity
-                  onPress={
-                    () => {
-                      setAllocationOrder(allocationOrder + 1)
-                      console.log("allocationOrder is: ")
-                      console.log(allocationOrder)
-                      if(allocationOrder == path.length - 1 ) {
-                        Alert.alert("You have arrived your destination!")
-                      }
-                    }}
-                  style={styles.nextButton}
-                >
-                  <Text style={styles.nextButtonText}>Arrived {savedHighlightedArea[path[allocationOrder]].name}</Text>
-                </TouchableOpacity>
-              )
+      <TouchableWithoutFeedback onPress={handleDoubleTap}>
+        <CameraView style={styles.camera} facing={facing} ref={cameraRef} zoom={0.01}>
+          <View style={styles.compassContainer}>
+            {scanedResult && selectedNode && path.length > 0 && allocationOrder < path.length &&
+              <>
+                <Compass direction={((
+                  CalculateOrientation(
+                    savedHighlightedArea,
+                    path[allocationOrder - 1],
+                    path[allocationOrder]
+                  ) || 0) - 90 + 45 + 180) % 360
+                } />
+              </>
             }
-            <View style={styles.buttonContainer}>
-              {/* <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+          </View>
+          <View style={containerStyle}>
+            <TouchableOpacity onPress={handleFloorPlanClick} activeOpacity={0.8}>
+              <Image source={floorplan} style={{ resizeMode: 'contain', width: imageWidth, height: imageHeight }} />
+            </TouchableOpacity>
+
+
+            {filteredSavedHighlightedArea(savedHighlightedArea, scanedResult, chosenId).map((area) => (
+              <View
+                key={area.id}
+                style={[
+                  styles.highlight,
+                  {
+                    left: iImageMSmaller ? area.x / 2 : area.x,
+                    top: iImageMSmaller ? area.y / 2 : area.y,
+                    width: iImageMSmaller ? area.width / 2 : area.width,
+                    height: iImageMSmaller ? area.height / 2 : area.height,
+                    borderColor: area.color,
+                  },
+                ]}
+              />
+            ))}
+          </View>
+
+          <View style={styles.nodeSelectionContainer}>
+            <TouchableOpacity
+              style={{ padding: 10 }}
+              onPress={() => setIsSearching(true)} // Show overlay on search button press
+            >
+              <AntDesign name="search1" size={30} color="black" />
+            </TouchableOpacity>
+          </View>
+
+          {
+            path.length > 0 && allocationOrder < path.length && (
+              <TouchableOpacity
+                onPress={
+                  () => {
+                    setAllocationOrder(allocationOrder + 1)
+                    console.log("allocationOrder is: ")
+                    console.log(allocationOrder)
+                    if (allocationOrder == path.length - 1) {
+                      Alert.alert("You have arrived your destination!")
+                    }
+                  }}
+                style={styles.nextButton}
+              >
+                <Text style={styles.nextButtonText}>Arrived {savedHighlightedArea[path[allocationOrder]].name}</Text>
+              </TouchableOpacity>
+            )
+          }
+          <View style={styles.buttonContainer}>
+            {/* <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
                 <AntDesign name="retweet" size={44} color="black" />
               </TouchableOpacity> */}
-              {/* <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
+            {/* <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
                 <AntDesign name="camera" size={44} color="black" />
               </TouchableOpacity> */}
-              <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
-                <View style={styles.outerCircle}>
-                  <View style={styles.innerCircle} />
-                </View>
-              </TouchableOpacity>
-            </View>
-            {isLoading &&
-              <ActivityIndicator
-                size="large"
-                color="black"
-                style={{
-                  flex: 1,                   // Take full screen height
-                  justifyContent: 'center',  // Center vertically
-                  alignItems: 'center',
-                }}
-              />
-            }
-          </CameraView>
+            <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
+              <View style={styles.outerCircle}>
+                <View style={styles.innerCircle} />
+              </View>
+            </TouchableOpacity>
+          </View>
+          {isLoading &&
+            <ActivityIndicator
+              size="large"
+              color="black"
+              style={{
+                flex: 1,                   // Take full screen height
+                justifyContent: 'center',  // Center vertically
+                alignItems: 'center',
+              }}
+            />
+          }
+        </CameraView>
       </TouchableWithoutFeedback>
 
       <Animated.View
@@ -364,10 +366,10 @@ export default function Camera() {
 
         <ScrollView style={styles.nodeList} contentContainerStyle={{ paddingBottom: 30 }}>
           <View style={containerStyle} style={{ width: 350, height: 200 }}>
-            <Image 
-              source={floorplan} 
-              style={{ 
-                width: 350, 
+            <Image
+              source={floorplan}
+              style={{
+                width: 350,
                 height: 200,
                 resizeMode: 'contain'
               }} />
@@ -550,7 +552,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-  },  
+  },
   nextButtonText: {
     color: '#fff',
     fontSize: 16,
