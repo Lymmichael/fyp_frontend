@@ -52,16 +52,4 @@ async function ImageDetect(model: any, bucket: any, photo: any, min_confidence: 
     }
 }
 
-// Example usage (remember to set your AWS credentials and configure the AWS SDK)
-// async function main() {
-//     const modelArn = 'arn:aws:rekognition:us-east-1:354392660622:project/fyp/version/fyp.2025-04-16T14.57.26/1744786647466'; // Replace with your actual model ARN
-//     const bucketName = 'fyp-final'; // Replace with your S3 bucket name
-//     const photoName = 'testing_image/testingPhoto.jpg'; // Replace with your image file name
-//     const minConfidence = 70;
-
-//     const numberOfLabels = await ImageDetect(modelArn, bucketName, photoName, minConfidence);
-//     console.log("Number of labels detected:", numberOfLabels);
-// }
-
-// main();
 export default ImageDetect

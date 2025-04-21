@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
-// Define TypeScript interfaces
 interface Node {
   id: number;
   name: string;
@@ -15,11 +14,11 @@ interface ShortestPathFinderProps {
   endId: number;
 }
 
-export const findShortestPath = (graph: Node[], startId: number, endId: number): number[] | null => {
-  if (startId === endId) return [startId];
-
+export const findShortestPath = (graph: Node[], startId?: number | null, endId?: number | null): number[] | null => {
+  if (startId === endId) return [startId || 0];
+  if (startId == null || endId == null) return null
   const visited = new Set<number>();
-  const queue: number[][] = [[startId]];
+  const queue: number[][] = [[startId || 0]];
 
   while (queue.length > 0) {
     const path = queue.shift()!;
@@ -49,50 +48,62 @@ const ShortestPathFinder: React.FC<ShortestPathFinderProps> = ({
   endId 
 }) => {
   const [path, setPath] = useState<number[] | null>(null);
-
   useEffect(() => {
     const result = findShortestPath(savedHighlightedArea, startId, endId);
     setPath(result);
+
   }, [savedHighlightedArea, startId, endId]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.pathPhrase}>Shortest Path: </Text>
 
-      <Text style={styles.pathPhrase}>
-        {path
-          ? path.map(id => savedHighlightedArea.find(n => n.id === id)?.name || id).join(' → ')
-          : 'No path found.'}
-      </Text>
+      {path ? (
+        <Text style={styles.pathPhrase}>
+          {path.map((id, index) => {
+            const node = savedHighlightedArea.find(n => n.id === id);
+            if (!node) return null;
+
+            // Add arrow except after last node
+            const arrow = index < path.length - 1 ? ' → ' : '';
+
+            return (
+              <Text key={id} style={{ color: node.color, fontSize: 14 }}>
+                {node.name + arrow}
+              </Text>
+            );
+          })}
+        </Text>
+      ) : (
+        <Text style={styles.pathPhrase}>No path found.</Text>
+      )}
     </View>
   );
-  
 };
+
 const styles = StyleSheet.create({
-    container: {
-    //   position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 40,               // smaller height for one line
-      backgroundColor: '#fff',
-      borderTopWidth: 1,
-      borderTopColor: '#ccc',
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 10,
-      // Optional shadow for iOS
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: -1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 3,
-      // Optional elevation for Android
-      elevation: 5,
-    },
-    pathPhrase: {
-      fontSize: 14,
-      color: '#000',
-      textAlign: 'center',
-    },
-  });
+  container: {
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 40,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  pathPhrase: {
+    fontSize: 14,
+    color: '#000',
+    textAlign: 'center',
+  },
+});
 
 export default ShortestPathFinder;

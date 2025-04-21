@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import * as Location from 'expo-location';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { AntDesign } from '@expo/vector-icons';
 
-const Compass = () => {
+interface CompassProps {
+  direction: number | null;
+}
+
+const Compass: React.FC<CompassProps> = ({ direction }) => {
   const [angle, setAngle] = useState<number | null>(null);
+  const [arrowDirection, setArrowDirection] = useState<string>(''); // Initialize with an empty string
 
   useEffect(() => {
     let subscription: Location.LocationSubscription | null = null;
@@ -27,6 +32,28 @@ const Compass = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (direction !== null) {
+      if (direction >= 337.5 || direction < 22.5) {
+        setArrowDirection('N');
+      } else if (direction >= 22.5 && direction < 67.5) {
+        setArrowDirection('NE');
+      } else if (direction >= 67.5 && direction < 112.5) {
+        setArrowDirection('E');
+      } else if (direction >= 112.5 && direction < 157.5) {
+        setArrowDirection('SE');
+      } else if (direction >= 157.5 && direction < 202.5) {
+        setArrowDirection('S');
+      } else if (direction >= 202.5 && direction < 247.5) {
+        setArrowDirection('SW');
+      } else if (direction >= 247.5 && direction < 292.5) {
+        setArrowDirection('W');
+      } else if (direction >= 292.5 && direction < 337.5) {
+        setArrowDirection('NW');
+      }
+    }
+  }, [direction]);
+
   // Convert angle to compass direction
   const getDirection = (deg: number | null): string => {
     if (deg === null) return '';
@@ -44,11 +71,10 @@ const Compass = () => {
   };
 
   return (
-    <>
-      {
-        getDirection(angle) == 'N' && 
+    <View style={styles.container}>
+      {arrowDirection === getDirection(angle) && (
         <AntDesign name="arrowup" size={250} color="red" />
-      }
+      )}
 
       <View style={styles.compassContainer}>
         <Text style={styles.compassText}>
@@ -59,19 +85,23 @@ const Compass = () => {
           {angle !== null ? `You are facing ${getDirection(angle)}` : ''}
         </Text>
       </View>
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   compassContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    flex: 1,
-    backgroundColor: 'white',
+    marginTop: 20,
   },
   compassText: {
-    fontSize: 28,
+    fontSize: 18,
     fontWeight: 'bold',
     color: 'black',
     backgroundColor: 'white',
@@ -79,9 +109,10 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 5,
     overflow: 'hidden',
+    marginBottom: 5,
   },
   directionText: {
-    fontSize: 28,
+    fontSize: 18,
     color: 'black',
     backgroundColor: 'white',
     paddingHorizontal: 10,
@@ -89,23 +120,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 10,
     overflow: 'hidden',
-  },
-  arrow: {
-    width: 100,
-    height: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  arrowHead: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 20,
-    borderLeftColor: 'transparent',
-    borderRightWidth: 20,
-    borderRightColor: 'transparent',
-    borderTopWidth: 50,
-    borderTopColor: 'red',
   },
 });
 

@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import Slider from '@react-native-community/slider';
 import LoginPage from '../../components/Login';
+import * as DocumentPicker from 'expo-document-picker';
 
 export default function UploadPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -131,23 +132,40 @@ export default function UploadPage() {
   const handleOrientationChange = (value: number) => {
     setOrientation(value);
   };
-
+  
+  
   const uploadVideo = async (videoUri) => {
     const formData = new FormData();
-    formData.append('video', { uri: videoUri, name: 'video.mp4', type: 'video/mp4' });
-
-    try {
-      // const response = await fetch('https://your-server-url.com/api/uploadVideo', {
-      //   method: 'POST',
-      //   body: formData,
-      // });
-
-      // const data = await response.json();
-      // console.log('Video Upload Response:', data);
-    } catch (error) {
-      console.error('Error uploading video:', error);
-    }
+    formData.append('video', {
+      uri: videoUri,
+      name: 'video.mp4',
+      type: 'video/mp4',
+    });
+  
+    // try {
+    //   const response = await fetch('https://your-api.com/upload', {
+    //     method: 'POST',
+    //     body: formData,
+    //     headers: {
+    //       'Content-Type': 'multipart/form-data', // Important for file uploads
+    //       // Add any authorization headers if needed, e.g.:
+    //       // 'Authorization': 'Bearer your-token',
+    //     },
+    //   });
+  
+    //   if (!response.ok) {
+    //     throw new Error(`Upload failed with status ${response.status}`);
+    //   }
+  
+    //   const data = await response.json();
+    //   console.log('Upload successful:', data);
+    //   return data; // Return response data if needed
+    // } catch (error) {
+    //   console.error('Error uploading video:', error);
+    //   throw error; // Rethrow if you want to handle it elsewhere
+    // }
   };
+  
 
   const handleSelectArea = (area) => {
     setSelectedArea(area);
@@ -184,6 +202,24 @@ export default function UploadPage() {
         return area;
       })
     );
+  };
+  const pickVideo = async (areaName) => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'video/*',
+        copyToCacheDirectory: true,
+      });
+
+      if (result.type === 'success') {
+        console.log(`Picked video for ${areaName}:`, result);
+        // You can do whatever you want with the video here
+        // For example, save the URI or show a preview
+      } else {
+        console.log('User cancelled video picker');
+      }
+    } catch (error) {
+      console.error('Error picking video:', error);
+    }
   };
 
   if (firstProcedure) {
@@ -281,82 +317,209 @@ export default function UploadPage() {
   } else if (secondProcedure) {
     return (
       <ScrollView style={styles.container}>
-        <Button
-          title='previous'
-          onPress={
-            () => {
-              setSecondProcedure(false);
-              setFirstProcedure(true);
+        <View style={{ top: 20 }}>
+
+          <Button
+            title='previous'
+            onPress={
+              () => {
+                setSecondProcedure(false);
+                setFirstProcedure(true);
+              }
             }
-          }
-        />
-        <View style={{ position: 'relative' }}>
-          <Image
-            source={{ uri: selectedImage }}
-            style={{ width: 350, height: 200 }}
           />
+          <View style={{ position: 'relative' }}>
+            <Image
+              source={{ uri: selectedImage }}
+              style={{ width: 350, height: 200 }}
+            />
+            {savedAreas.map((area, index) => (
+              <React.Fragment key={index}>
+                <View
+                  style={[
+                    styles.highlight,
+                    {
+                      left: area.x,
+                      top: area.y,
+                      width: area.width,
+                      height: area.height,
+                      borderColor: area.color, // Use the saved color for each area
+                    },
+                  ]}
+                />
+              </React.Fragment>
+            ))}
+          </View>
           {savedAreas.map((area, index) => (
-            <React.Fragment key={index}>
-              <View
-                style={[
-                  styles.highlight,
-                  {
-                    left: area.x,
-                    top: area.y,
-                    width: area.width,
-                    height: area.height,
-                    borderColor: area.color, // Use the saved color for each area
-                  },
-                ]}
-              />
-            </React.Fragment>
+            <View key={index}>
+              <Text style={{ color: 'white' }}>Area {index + 1}</Text>
+              <TextInput
+                placeholder="Enter name for this area"
+                placeholderTextColor="grey"   // Set placeholder color to white
+                value={areaNames[area.id]}
+                onChangeText={(text) => setAreaNames((prevNames) => ({ ...prevNames, [area.id]: text }))}
+                style={{
+                  color: area.color,
+                  // borderWidth: 1,
+                  // borderColor: 'white',
+                  paddingHorizontal: 8,
+                  height: 40,
+                  borderRadius: 4,
+                }} />
+            </View>
           ))}
-        </View>
-        {savedAreas.map((area, index) => (
-          <View key={index}>
-            <Text >Area {index + 1} ({area.width}x{area.height})</Text>
-            <TextInput
-              placeholder="Enter name for this area"
-              value={areaNames[area.id]}
-              onChangeText={(text) => setAreaNames((prevNames) => ({ ...prevNames, [area.id]: text }))}
-              style={{ color: area.color }} // Set text color to area color
+          <View style={{ marginBottom: 50 }}>
+            <Button
+              title='Next'
+              onPress={() => {
+                // Check if any area name is missing or empty
+                const allNamesFilled = savedAreas.every(area => {
+                  const name = areaNames[area.id];
+                  return name && name.trim().length > 0;
+                });
+                if (!allNamesFilled) {
+                  Alert.alert("Please fill in all the names of different areas");
+                } else {
+                  updateAreaNames();
+                  setSecondProcedure(false);
+                  setThirdProcedure(true);
+                }
+              }}
             />
           </View>
-        ))}
-        <View style={{ marginBottom: 50 }}>
-          <Button
-            title='Next'
-            onPress={() => {
-              // Check if any area name is missing or empty
-              const allNamesFilled = savedAreas.every(area => {
-                const name = areaNames[area.id];
-                return name && name.trim().length > 0;
-              });
-              if (!allNamesFilled) {
-                Alert.alert("Please fill in all the names of different areas");
-              } else {
-                updateAreaNames();
-                setSecondProcedure(false);
-                setThirdProcedure(true);
-              }
-            }}
-          />
-        </View>
 
+
+        </View>
       </ScrollView>
     );
   } else if (thirdProcedure) {
     return (
       <ScrollView style={styles.container}>
-        <Button
-          title='previous'
-          onPress={
-            () => {
-              setThirdProcedure(false);
-              setSecondProcedure(true);
-              console.log(savedAreas);
+        <View style={{ top: 20 }}>
+
+          <Button
+            title='previous'
+            onPress={
+              () => {
+                setThirdProcedure(false);
+                setSecondProcedure(true);
+                console.log(savedAreas);
+              }
             }
-          }
+          />
+          <View style={{ position: 'relative' }}>
+            <Image
+              source={{ uri: selectedImage }}
+              style={{ width: 350, height: 200 }}
+            />
+            {savedAreas.map((area, index) => (
+              <React.Fragment key={index}>
+                <View
+                  style={[
+                    styles.highlight,
+                    {
+                      left: area.x,
+                      top: area.y,
+                      width: area.width,
+                      height: area.height,
+                      borderColor: area.color, // Use the saved color for each area
+                    },
+                  ]}
+                />
+              </React.Fragment>
+            ))}
+          </View>
+          <Text style={{ color: 'white' }}>Please enter where this node can go</Text>
+          {savedAreas.map((area, index) => (
+            <View key={index}>
+              <Text style={{ color: area.color }}>
+                {area.name}
+              </Text>
+              <Text style={styles.canGoToText}>
+                Can go to:
+                <Text style={styles.accessibleAreasText}>
+                  {savedAreas
+                    .filter((otherArea) => area.accessibleNode.includes(otherArea.id))
+                    .map((otherArea) => otherArea.name)
+                    .join(', ')}
+                </Text>
+              </Text>
+
+              <TouchableOpacity
+                onPress={() => handleSelectArea(area)}
+                style={styles.selectButton}
+              >
+                <Text style={styles.selectButtonText}>Select where to go</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              setModalVisible(false);
+            }}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Text style={{ color: 'white' }}>
+                  Select areas for {selectedArea?.name} to go to:
+                </Text>
+                {savedAreas
+                  .filter((area) => area.id !== selectedArea?.id)
+                  .map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      onPress={() => handleToggleAreaToGo(item.id)}
+                      style={styles.checkboxContainer}
+                    >
+                      <Text style={{ color: 'white' }}>{item.name}</Text>
+                      {selectedAreasToGo[selectedArea?.id] &&
+                        selectedAreasToGo[selectedArea?.id].includes(item.id) && (
+                          <Text style={{ color: 'green' }}>&#10004;</Text>
+                        )}
+                    </TouchableOpacity>
+                  ))}
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Text style={styles.closeButtonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+          <View style={{ marginBottom: 50 }}>
+            <Button
+              title='next'
+              onPress={() => {
+                highlightedAreas.forEach(node => {
+                  const nodeId = node.id.toString();
+                  if (selectedAreasToGo[nodeId]) {
+                    node.accessibleNode = selectedAreasToGo[nodeId];
+                  }
+                });
+
+                setThirdProcedure(false);
+                console.log(selectedAreasToGo);
+                console.log(highlightedAreas);
+              }}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    );
+  } else {
+    return <ScrollView style={styles.container}>
+      <View style={{ top: 20 }}>
+
+        <Button
+          title="previous"
+          onPress={() => {
+            setThirdProcedure(true);
+          }}
         />
         <View style={{ position: 'relative' }}>
           <Image
@@ -380,160 +543,50 @@ export default function UploadPage() {
             </React.Fragment>
           ))}
         </View>
-        <Text style={{ color: 'white' }}>Please enter where this node can go</Text>
         {savedAreas.map((area, index) => (
-          <View key={index}>
-            <Text style={{ color: area.color }}>
+          <View key={index} style={{ marginBottom: 20 }}>
+            <Text style={{ color: area.color, fontSize: 18, fontWeight: 'bold' }}>
               {area.name}
             </Text>
-            <Text style={styles.canGoToText}>
-              Can go to:
-              <Text style={styles.accessibleAreasText}>
-                {savedAreas
-                  .filter((otherArea) => area.accessibleNode.includes(otherArea.id))
-                  .map((otherArea) => otherArea.name)
-                  .join(', ')}
-              </Text>
-            </Text>
-
             <TouchableOpacity
-              onPress={() => handleSelectArea(area)}
-              style={styles.selectButton}
+              style={{
+                backgroundColor: area.color,
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                borderRadius: 8,
+                alignItems: 'center',
+              }}
+              onPress={() => {
+                pickVideo(area.name)
+                console.log(`Upload video for ${area.name}`);
+              }}
             >
-              <Text style={styles.selectButtonText}>Select where to go</Text>
+              <Text style={{ color: 'white', fontSize: 16 }}>Upload</Text>
             </TouchableOpacity>
           </View>
         ))}
 
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(false);
-          }}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={{ color: 'white' }}>
-                Select areas for {selectedArea?.name} to go to:
-              </Text>
-              {savedAreas
-                .filter((area) => area.id !== selectedArea?.id)
-                .map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    onPress={() => handleToggleAreaToGo(item.id)}
-                    style={styles.checkboxContainer}
-                  >
-                    <Text style={{ color: 'white' }}>{item.name}</Text>
-                    {selectedAreasToGo[selectedArea?.id] &&
-                      selectedAreasToGo[selectedArea?.id].includes(item.id) && (
-                        <Text style={{ color: 'green' }}>&#10004;</Text>
-                      )}
-                  </TouchableOpacity>
-                ))}
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-        <View style={{ marginBottom: 50 }}>
-          <Button
-            title='next'
-            onPress={() => {
-              highlightedAreas.forEach(node => {
-                const nodeId = node.id.toString();
-                if (selectedAreasToGo[nodeId]) {
-                  node.accessibleNode = selectedAreasToGo[nodeId];
-                }
-              });
-
-              setThirdProcedure(false);
-              console.log(selectedAreasToGo);
-              console.log(highlightedAreas);
-            }}
-          />
-        </View>
-      </ScrollView>
-    );
-  } else {
-    return <ScrollView style={styles.container}>
-      <Button
-        title="previous"
-        onPress={() => {
-          setThirdProcedure(true);
-        }}
-      />
-      <View style={{ position: 'relative' }}>
-        <Image
-          source={{ uri: selectedImage }}
-          style={{ width: 350, height: 200 }}
-        />
-        {savedAreas.map((area, index) => (
-          <React.Fragment key={index}>
-            <View
-              style={[
-                styles.highlight,
-                {
-                  left: area.x,
-                  top: area.y,
-                  width: area.width,
-                  height: area.height,
-                  borderColor: area.color, // Use the saved color for each area
-                },
-              ]}
-            />
-          </React.Fragment>
-        ))}
-      </View>
-      {savedAreas.map((area, index) => (
-        <View key={index} style={{ marginBottom: 20 }}>
-          <Text style={{ color: area.color, fontSize: 18, fontWeight: 'bold' }}>
-            {area.name}
-          </Text>
-          <TouchableOpacity
-            style={{
-              backgroundColor: area.color,
-              paddingVertical: 10,
-              paddingHorizontal: 20,
-              borderRadius: 8,
-              alignItems: 'center',
-            }}
-            onPress={() => {
-              // Your button press handler here
-              console.log(`Upload video for ${area.name}`);
-            }}
-          >
-            <Text style={{ color: 'white', fontSize: 16 }}>Upload</Text>
-          </TouchableOpacity>
-        </View>
-      ))}
-
-      <Button
-        title='Done'
-        onPress={() => {
-          if (uploadSuccess == false) {
-            {
-              Alert.alert("please upload video for each of the area")
+        <Button
+          title='Done'
+          onPress={() => {
+            if (uploadSuccess == false) {
+              {
+                Alert.alert("please upload video for each of the area")
+              }
+            } else {
+              console.log("areaNames is: ")
+              // console.log(areaNames)
+              console.log("highlightedAreas are: ")
+              console.log(highlightedAreas)
+              setUplaodSuccess(true)
             }
-          } else {
-            console.log("areaNames is: ")
-            // console.log(areaNames)
-            console.log("highlightedAreas are: ")
-            console.log(highlightedAreas)
-            setUplaodSuccess(true)
-          }
-        }}
-      />
-      {uploadSuccess &&
-        <Text style={{ color: 'white', padding: 10, marginBottom: 50 }}>
-          Successfully Upload, Once the model is trained, we will send you a email!
-        </Text>}
+          }}
+        />
+        {uploadSuccess &&
+          <Text style={{ color: 'white', padding: 10, marginBottom: 50 }}>
+            Successfully Upload, Once the model is trained, we will send you a email!
+          </Text>}
+      </View>
     </ScrollView>
   }
 }
