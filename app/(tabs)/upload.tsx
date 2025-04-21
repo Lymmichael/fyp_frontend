@@ -5,9 +5,16 @@ import * as MediaLibrary from 'expo-media-library';
 import Slider from '@react-native-community/slider';
 import LoginPage from '../../components/Login';
 import * as DocumentPicker from 'expo-document-picker';
+import {
+  AntDesign,
+  Entypo,
+  Feather,
+  FontAwesome,
+  MaterialCommunityIcons,
+} from '@expo/vector-icons';
 
 export default function UploadPage() {
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [orientation, setOrientation] = useState(0);
   const [startX, setStartX] = useState(0);
@@ -26,8 +33,8 @@ export default function UploadPage() {
   const [uploadSuccess, setUplaodSuccess] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false)
-
-	if (!isLogin) {
+  const [askOrientation, setAskOrientation] = useState(false)
+  if (!isLogin) {
     return (<LoginPage onLoginSuccess={() => setIsLogin(true)} />);
   }
   const openImagePicker = async () => {
@@ -89,10 +96,11 @@ export default function UploadPage() {
   };
 
   const undo = () => {
-      setHighlightedAreas((prevAreas) => {
-        if (prevAreas.length === 0) return prevAreas; // nothing to remove
-        return prevAreas.slice(0, prevAreas.length - 1);
-      });
+    console.log(highlightedAreas)
+    setHighlightedAreas((prevAreas) => {
+      if (prevAreas.length === 0) return prevAreas; // nothing to remove
+      return prevAreas.slice(0, prevAreas.length - 1);
+    });
   }
 
   const clearSavedAreas = () => {
@@ -104,8 +112,8 @@ export default function UploadPage() {
 
   const updateAreaNames = () => {
     const updatedAreas = highlightedAreas.map((area) => ({ ...area, name: areaNames[area.id] }));
-    setHighlightedAreas(updatedAreas); // Update highlightedAreas with names
-    setSavedAreas(updatedAreas); // Update savedAreas with names
+    setHighlightedAreas(updatedAreas);
+    setSavedAreas(updatedAreas);
     console.log(highlightedAreas);
   };
 
@@ -138,8 +146,8 @@ export default function UploadPage() {
   const handleOrientationChange = (value: number) => {
     setOrientation(value);
   };
-  
-  
+
+
   const uploadVideo = async (videoUri) => {
     const formData = new FormData();
     formData.append('video', {
@@ -147,7 +155,7 @@ export default function UploadPage() {
       name: 'video.mp4',
       type: 'video/mp4',
     });
-  
+
     // try {
     //   const response = await fetch('https://your-api.com/upload', {
     //     method: 'POST',
@@ -158,11 +166,11 @@ export default function UploadPage() {
     //       // 'Authorization': 'Bearer your-token',
     //     },
     //   });
-  
+
     //   if (!response.ok) {
     //     throw new Error(`Upload failed with status ${response.status}`);
     //   }
-  
+
     //   const data = await response.json();
     //   console.log('Upload successful:', data);
     //   return data; // Return response data if needed
@@ -172,6 +180,22 @@ export default function UploadPage() {
     // }
   };
   
+
+  const compassButton = () => {
+    if (askOrientation == false) {
+      setAskOrientation(true);
+    } else {
+      setAskOrientation(false);
+    }
+  }
+  const ButtonWithIcon = ({ name, icon, onPress}) => {
+    return (
+      <TouchableOpacity style={upload2Styles.iconButton} onPress={onPress}>
+        {icon}
+        <Text style={{color: 'white'}}>{name}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   const handleSelectArea = (area) => {
     setSelectedArea(area);
@@ -231,97 +255,147 @@ export default function UploadPage() {
   if (procedure == 0) {
     return (
       <>
-        <View style={styles.container}>
-          <View style={{ top: 20 }}>
+        {
+          !selectedImage &&
+          <View style={uploadStyles.container}>
+            <Text style={uploadStyles.filesTitle}>Upload Files</Text>
 
-            <Button title="Upload Photo" onPress={openImagePicker} />
-            <Button title="Save Highlighted Areas" onPress={saveHighlightedAreas} />
-            <Button title="Clear Saved Areas" onPress={clearSavedAreas} />
-            {highlightedAreas &&
-              <Button title="Undo" onPress={undo} />
-            }
-            
-            {/* <Button title="Undo" onPress={} /> */}
-            {selectedImage && (
-              <View style={{ position: 'relative' }}>
-                <Image
-                  source={{ uri: selectedImage }}
-                  style={{ width: 350, height: 200 }}
-                  onTouchStart={handleTouchStart}
-                  onTouchMove={handleTouchMove}
-                  onTouchEnd={handleTouchEnd}
-                />
-                {isHighlighting && (
-                  <View
-                    style={[
-                      styles.highlight,
-                      {
-                        left: Math.min(startX, endX),
-                        top: Math.min(startY, endY),
-                        width: Math.abs(endX - startX),
-                        height: Math.abs(endY - startY),
-                        borderColor: getRandomColor(), // Use a random color for the current highlight
-                      },
-                    ]}
+            <View style={uploadStyles.uploadArea}>
+              <AntDesign name="cloudupload" size={60} color="white" />
+              <Text style={uploadStyles.dragText}>Drag or drop file here</Text>
+              <Text style={uploadStyles.orText}>-OR-</Text>
+              <TouchableOpacity style={uploadStyles.chooseFileButton} onPress={openImagePicker}>
+                <Text style={uploadStyles.chooseFileText}>Choose file</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        }
+        {selectedImage &&
+          <View style={styles.container}>
+            <View style={{ top: 20 }}>
+              <TouchableOpacity style={styles.uploadButton} onPress={openImagePicker}>
+                <Text style={styles.plus}>+</Text>
+              </TouchableOpacity>
+              {selectedImage && (
+                <View style={{ position: 'relative' }}>
+                  <Image
+                    source={{ uri: selectedImage }}
+                    style={{ width: 350, height: 200 }}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
                   />
-                )}
-                {highlightedAreas.map((area, index) => (
-                  <React.Fragment key={index}>
+                  {isHighlighting && (
                     <View
                       style={[
                         styles.highlight,
                         {
-                          left: area.x,
-                          top: area.y,
-                          width: area.width,
-                          height: area.height,
-                          borderColor: area.color, // Use the saved color for each area
+                          left: Math.min(startX, endX),
+                          top: Math.min(startY, endY),
+                          width: Math.abs(endX - startX),
+                          height: Math.abs(endY - startY),
+                          borderColor: getRandomColor(), // Use a random color for the current highlight
                         },
                       ]}
                     />
-                  </React.Fragment>
-                ))}
+                  )}
+                  {highlightedAreas.map((area, index) => (
+                    <React.Fragment key={index}>
+                      <View
+                        style={[
+                          styles.highlight,
+                          {
+                            left: area.x,
+                            top: area.y,
+                            width: area.width,
+                            height: area.height,
+                            borderColor: area.color, // Use the saved color for each area
+                          },
+                        ]}
+                      />
+                    </React.Fragment>
+                  ))}
+                </View>
+              )}
+              <View style={upload2Styles.container}>
+                <View style={upload2Styles.topButtons}>
+                  <ButtonWithIcon
+                    name="Save"
+                    icon={<Entypo name="save" size={20} color="white" />}
+                    onPress={saveHighlightedAreas}
+                  />
+                  <ButtonWithIcon
+                    name="Undo"
+                    icon={<Entypo name="back" size={20} color="white" />}
+                    onPress={undo}
+                  />
+                  <ButtonWithIcon
+                    name="Clear"
+                    icon={<Feather name="x" size={20} color="white" />}
+                    onPress={clearSavedAreas}
+                  />
+                  <ButtonWithIcon
+                    name="Compass"
+                    icon={<Entypo name="compass" size={20} color="white" />}
+                    onPress={compassButton}
+                  />
+                  <ButtonWithIcon
+                    name="Proceed"
+                    icon={<Entypo name="check" size={20} color="white" />}
+                    onPress={
+                    () => {
+                      if (!selectedImage) {
+                        Alert.alert("Please upload the image");
+                      } else if (savedAreas.length === 0) {
+                        Alert.alert("Please highlight area you want");
+                      } else {
+                        console.log(savedAreas);
+                        setProcedure(1)
+                      }
+                    }}
+                  />
+                </View>
               </View>
-            )}
-            {savedAreas && <Text style={{ color: 'white' }}>
-              Number of highlighted area: {savedAreas.length}
-            </Text>}
-            {
-              selectedImage &&
-              <View>
-                <Text style={{ color: 'white' }}>What is the orientation if pointing upward: {orientation}</Text>
-                <Slider
-                  minimumValue={0}
-                  maximumValue={359}
-                  step={1}
-                  value={orientation}
-                  onValueChange={handleOrientationChange}
-                  minimumTrackTintColor="#007AFF"
-                  maximumTrackTintColor="#f5f5f5"
-                />
-                <Text style={{ color: 'white' }}> 0 is North; 90 is East; 180 is South and 270 is West</Text>
-              </View>
-            }
-            <View style={{ marginBottom: 50 }}>
-              <Button
-                title='Next'
-                onPress={
-                  () => {
-                    if (!selectedImage) {
-                      Alert.alert("Please upload the image");
-                    } else if (savedAreas.length === 0) {
-                      Alert.alert("Please highlight area you want");
-                    } else {
-                      console.log(savedAreas);
-                      setProcedure(1)
+              {savedAreas && <Text style={{ color: 'white' }}>
+                Number of highlighted area: {savedAreas.length}
+              </Text>}
+              {selectedImage && askOrientation &&
+                <View>
+                  <Text style={{ color: 'white' }}>What is the orientation if pointing upward: {orientation}</Text>
+                  <Slider
+                    minimumValue={0}
+                    maximumValue={359}
+                    step={1}
+                    value={orientation}
+                    onValueChange={handleOrientationChange}
+                    minimumTrackTintColor="#007AFF"
+                    maximumTrackTintColor="#f5f5f5"
+                  />
+                  <Text style={{ color: 'white' }}> 0 is North; 90 is East; 180 is South and 270 is West</Text>
+                </View>
+              }
+{/*               
+              <View style={{ marginBottom: 50 }}>
+                <Button
+                  title='Next'
+                  onPress={
+                    () => {
+                      if (!selectedImage) {
+                        Alert.alert("Please upload the image");
+                      } else if (savedAreas.length === 0) {
+                        Alert.alert("Please highlight area you want");
+                      } else {
+                        console.log(savedAreas);
+                        setProcedure(1)
+                      }
                     }
                   }
-                }
-              />
-            </View>
+                />
+              </View> */}
 
+            </View>
           </View>
-        </View>
+        }
       </>
     );
   } else if (procedure == 1) {
@@ -526,7 +600,7 @@ export default function UploadPage() {
           title="previous"
           onPress={() => {
             setProcedure(2)
-        }}
+          }}
         />
         <View style={{ position: 'relative' }}>
           <Image
@@ -576,17 +650,17 @@ export default function UploadPage() {
         <Button
           title='Done'
           onPress={() => {
-						if (uploadSuccess == true) {
-							Alert.alert("You have uploaded all videos")
-						} else {
-            setIsLoading(true);
-            setTimeout(() => {
+            if (uploadSuccess == true) {
+              Alert.alert("You have uploaded all videos")
+            } else {
+              setIsLoading(true);
+              setTimeout(() => {
                 setIsLoading(false);
-								setUplaodSuccess(true)
+                setUplaodSuccess(true)
                 Alert.alert("Upload Successful")
-            }, 10000);
-          	}
-					}}
+              }, 10000);
+            }
+          }}
         />
         {isLoading &&
           <ActivityIndicator
@@ -614,6 +688,19 @@ const styles = StyleSheet.create({
     padding: 20,
     flex: 1,
     backgroundColor: 'black',
+  },
+  uploadButton: {
+    backgroundColor: 'grey',
+    width: 50,
+    height: 50,
+    borderRadius: 25, // circular button
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  plus: {
+    color: 'white',
+    fontSize: 30,
+    lineHeight: 30,
   },
   highlight: {
     position: 'absolute',
@@ -670,5 +757,119 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+});
+
+const uploadStyles = StyleSheet.create({
+  container: {
+    top: 40,
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#000000', // black background
+  },
+  uploadArea: {
+    borderWidth: 1,
+    borderColor: 'lightgrey',
+    borderStyle: 'dashed',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  dragText: {
+    fontSize: 16,
+    color: 'white', // white text
+    marginTop: 10,
+  },
+  orText: {
+    fontSize: 16,
+    color: 'white', // white text
+    marginVertical: 10,
+  },
+  chooseFileButton: {
+    backgroundColor: 'blue', // blue button
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  chooseFileText: {
+    color: 'white', // white text
+    fontSize: 16,
+  },
+  filesSection: {
+    marginBottom: 20,
+  },
+  filesTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: 'white', // white text
+  },
+  fileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  fileName: {
+    fontSize: 16,
+    marginLeft: 10,
+    flex: 1,
+    color: 'white', // white text
+  },
+  fileSize: {
+    fontSize: 14,
+    color: 'grey',
+    marginRight: 10,
+  },
+  removeButton: {
+    padding: 5,
+  },
+  uploadButton: {
+    backgroundColor: 'blue', // blue button
+    paddingVertical: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  uploadButtonText: {
+    color: 'white', // white text
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
+
+const upload2Styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'black',
+    padding: 8
+  },
+  topButtons: {
+    flexDirection: 'row',
+    gap: 10, // Add this line to create a gap of 10 pixels between items
+    justifyContent: 'space-between',
+    marginBottom: 20,
+
+  },
+  iconButton: {
+    backgroundColor: '#222',
+    padding: 8,         // Reduced padding
+    borderRadius: 8,
+    alignItems: 'center',
+  
+  },
+  buttonText: {
+    color: 'white',
+    marginTop: 5,
+  },
+  bottomButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  bottomButton: {
+    backgroundColor: '#222',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
 });
