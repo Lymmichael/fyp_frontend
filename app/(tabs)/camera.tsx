@@ -416,11 +416,16 @@ export default function Camera() {
               )
             }
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+              {/* <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
                 <AntDesign name="retweet" size={44} color="black" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
+              </TouchableOpacity> */}
+              {/* <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
                 <AntDesign name="camera" size={44} color="black" />
+              </TouchableOpacity> */}
+              <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
+                <View style={styles.outerCircle}>
+                  <View style={styles.innerCircle} />
+                </View>
               </TouchableOpacity>
             </View>
             {isLoading &&
@@ -540,6 +545,25 @@ const styles = StyleSheet.create({
     left: 0,
     flex: 1,
   },
+  captureButton: {
+    alignItems: 'center',
+  },
+  outerCircle: {
+    borderWidth: 4,
+    borderColor: 'white',
+    borderRadius: 50,
+    width: 80,
+    height: 80,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  innerCircle: {
+    backgroundColor: 'white',
+    borderRadius: 40,
+    width: 68,
+    height: 68,
+  },
   compassContainer: {
     position: 'absolute',
     bottom: 180,
@@ -621,7 +645,7 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     position: 'absolute',
-    bottom: 70,          // distance from the bottom of the screen
+    bottom: 110,          // distance from the bottom of the screen
     left: 20,            // distance from the left edge
     right: 20,           // distance from the right edge
     backgroundColor: '#007AFF',
@@ -637,6 +661,6 @@ const styles = StyleSheet.create({
   nextButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600'
   },
 });
