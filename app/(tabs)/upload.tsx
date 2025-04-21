@@ -237,7 +237,7 @@ export default function UploadPage() {
             <Button title="Upload Photo" onPress={openImagePicker} />
             <Button title="Save Highlighted Areas" onPress={saveHighlightedAreas} />
             <Button title="Clear Saved Areas" onPress={clearSavedAreas} />
-            {selectedArea &&
+            {highlightedAreas &&
               <Button title="Undo" onPress={undo} />
             }
             
@@ -333,7 +333,7 @@ export default function UploadPage() {
             title='previous'
             onPress={
               () => {
-                setProcedure(1)
+                setProcedure(0)
               }
             }
           />
