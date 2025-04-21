@@ -13,7 +13,8 @@ import {
   ScrollView,
   Animated,
   ActivityIndicator,
-  Alert
+  Alert,
+  TouchableWithoutFeedback
 } from 'react-native';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import Compass from '../../components/Compass';
@@ -223,6 +224,10 @@ export default function Camera() {
   const [allocationOrder, setAllocationOrder] = useState<number>(1)
   const path = findShortestPath(savedHighlightedArea, scanedResult, selectedNode?.id) || []
 
+
+  const [tapCount, setTapCount] = useState(0);
+  const [lastTap, setLastTap] = useState(null);
+
   useEffect(() => {
     if (isSearching) {
       Animated.timing(slideAnim, {
@@ -255,6 +260,21 @@ export default function Camera() {
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
+
+  const handleDoubleTap = () => {
+    const now = Date.now();
+    const DOUBLE_PRESS_DELAY = 300; // Adjust delay as needed
+
+    if (lastTap && (now - lastTap) < DOUBLE_PRESS_DELAY) {
+      toggleCameraFacing();
+      setTapCount(0); // Reset tap count
+    } else {
+      setTapCount(1);
+    }
+
+    setLastTap(now);
+  };
+
 
   const model = "arn:aws:rekognition:us-east-1:354392660622:project/fyp_engine_10F/version/fyp_engine_10F.2025-04-20T23.15.17/1745162117151"
   const bucket = 'fyp-final'
@@ -330,90 +350,92 @@ export default function Camera() {
   const chosenId = selectedNode ? selectedNode.id : undefined;
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef} zoom={0.01}>
-        <View style={styles.compassContainer}>
-          {scanedResult && selectedNode && path.length > 0 && allocationOrder < path.length &&
-            <>
-              <Compass direction={((
-                CalculateOrientation(
-                  savedHighlightedArea,
-                  path[allocationOrder - 1],
-                  path[allocationOrder]
-                ) || 0) + 0) % 360
-              } />
-            </>
-          }
-        </View>
-        <View style={containerStyle}>
-          <TouchableOpacity onPress={handleFloorPlanClick} activeOpacity={0.8}>
-            <Image source={floorplan} style={{resizeMode: 'contain', width: imageWidth, height: imageHeight }} />
-          </TouchableOpacity>
+        <TouchableWithoutFeedback onPress={handleDoubleTap}>
+          <CameraView style={styles.camera} facing={facing} ref={cameraRef} zoom={0.01}>
+            <View style={styles.compassContainer}>
+              {scanedResult && selectedNode && path.length > 0 && allocationOrder < path.length &&
+                <>
+                  <Compass direction={((
+                    CalculateOrientation(
+                      savedHighlightedArea,
+                      path[allocationOrder - 1],
+                      path[allocationOrder]
+                    ) || 0) + 0) % 360
+                  } />
+                </>
+              }
+            </View>
+            <View style={containerStyle}>
+              <TouchableOpacity onPress={handleFloorPlanClick} activeOpacity={0.8}>
+                <Image source={floorplan} style={{resizeMode: 'contain', width: imageWidth, height: imageHeight }} />
+              </TouchableOpacity>
 
 
-          {filteredSavedHighlightedArea(savedHighlightedArea, scanedResult, chosenId).map((area) => (
-            <View
-              key={area.id}
-              style={[
-                styles.highlight,
-                {
-                  left: iImageMSmaller ? area.x / 2 : area.x,
-                  top: iImageMSmaller ? area.y / 2 : area.y,
-                  width: iImageMSmaller ? area.width / 2 : area.width,
-                  height: iImageMSmaller ? area.height / 2 : area.height,
-                  borderColor: area.color,
-                },
-              ]}
-            />
-          ))}
-        </View>
+              {filteredSavedHighlightedArea(savedHighlightedArea, scanedResult, chosenId).map((area) => (
+                <View
+                  key={area.id}
+                  style={[
+                    styles.highlight,
+                    {
+                      left: iImageMSmaller ? area.x / 2 : area.x,
+                      top: iImageMSmaller ? area.y / 2 : area.y,
+                      width: iImageMSmaller ? area.width / 2 : area.width,
+                      height: iImageMSmaller ? area.height / 2 : area.height,
+                      borderColor: area.color,
+                    },
+                  ]}
+                />
+              ))}
+            </View>
 
-        <View style={styles.nodeSelectionContainer}>
-          <TouchableOpacity
-            style={{ padding: 10 }}
-            onPress={() => setIsSearching(true)} // Show overlay on search button press
-          >
-            <AntDesign name="search1" size={30} color="black" />
-          </TouchableOpacity>
-        </View>
+            <View style={styles.nodeSelectionContainer}>
+              <TouchableOpacity
+                style={{ padding: 10 }}
+                onPress={() => setIsSearching(true)} // Show overlay on search button press
+              >
+                <AntDesign name="search1" size={30} color="black" />
+              </TouchableOpacity>
+            </View>
 
-        {
-          path.length > 0 && allocationOrder < path.length && (
-            <TouchableOpacity
-              onPress={
-                () => {
-                  setAllocationOrder(allocationOrder + 1)
-                  console.log("allocationOrder is: ")
-                  console.log(allocationOrder)
-                  if(allocationOrder == path.length - 1 ) {
-                    Alert.alert("You have arrived your destination!")
-                  }
+            {
+              path.length > 0 && allocationOrder < path.length && (
+                <TouchableOpacity
+                  onPress={
+                    () => {
+                      setAllocationOrder(allocationOrder + 1)
+                      console.log("allocationOrder is: ")
+                      console.log(allocationOrder)
+                      if(allocationOrder == path.length - 1 ) {
+                        Alert.alert("You have arrived your destination!")
+                      }
+                    }}
+                  style={styles.nextButton}
+                >
+                  <Text style={styles.nextButtonText}>Arrived {savedHighlightedArea[path[allocationOrder]].name}</Text>
+                </TouchableOpacity>
+              )
+            }
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+                <AntDesign name="retweet" size={44} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
+                <AntDesign name="camera" size={44} color="black" />
+              </TouchableOpacity>
+            </View>
+            {isLoading &&
+              <ActivityIndicator
+                size="large"
+                color="black"
+                style={{
+                  flex: 1,                   // Take full screen height
+                  justifyContent: 'center',  // Center vertically
+                  alignItems: 'center',
                 }}
-              style={styles.nextButton}
-            >
-              <Text style={styles.nextButtonText}>Arrived {savedHighlightedArea[path[allocationOrder]].name}</Text>
-            </TouchableOpacity>
-          )
-        }
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-            <AntDesign name="retweet" size={44} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
-            <AntDesign name="camera" size={44} color="black" />
-          </TouchableOpacity>
-        </View>
-        {isLoading &&
-          <ActivityIndicator
-            size="large"
-            color="black"
-            style={{
-              flex: 1,                   // Take full screen height
-              justifyContent: 'center',  // Center vertically
-              alignItems: 'center',
-            }}
-          />
-        }
-      </CameraView>
+              />
+            }
+          </CameraView>
+      </TouchableWithoutFeedback>
 
       <Animated.View
         style={[
@@ -510,6 +532,14 @@ const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center' },
   camera: { flex: 1 },
   highlight: { position: 'absolute', borderWidth: 2 },
+  doubleTapArea: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    flex: 1,
+  },
   compassContainer: {
     position: 'absolute',
     bottom: 180,
