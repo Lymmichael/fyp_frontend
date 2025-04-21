@@ -1,0 +1,35 @@
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Server
+    participant MongoDB
+    participant AWS
+
+    Admin->>+Frontend: Login
+    Frontend->>+Server: Auth Request
+    Server->>+MongoDB: Verify Credentials
+    MongoDB-->>-Server: User Data
+    Server-->>-Frontend: Auth Success
+    Admin->>Frontend: Upload Floorplan and specific information of Floorplan
+    Frontend->>MongoDB: Save Floorplan+specifications
+    Admin->>Frontend: Upload Videos
+    Frontend->>Server: Send Videos with labeling
+    Server->>AWS S3: Data preprocessing and Split videos to frames with labeling 
+    AWS S3-->>AWS Rekognition: Train Model
+    AWS Rekognition-->>MongoDB: Save Model Link
+
+    User->>+Frontend: Take Photo
+    Frontend->>+AWS S3: Send Photo
+    AWS S3->>+AWS Rekognition: Predict
+    alt Prediction Success
+        AWS Rekognition-->>Frontend: Area+Confidence%
+        Frontend->>Server: Request Floorplan
+        Server->>MongoDB: Get Data
+        MongoDB-->>Server: Floorplan+Highlights
+        Server-->>Frontend: Floorplan+Highlights
+        Frontend-->>User: Navigation Data and Show Compass Directions
+    else Prediction Failed
+        AWS Rekognition-->>Server: Null
+        Server->>Frontend: Bad response
+        Frontend->>User: "Scan Again"
+    end

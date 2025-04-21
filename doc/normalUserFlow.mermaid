@@ -1,0 +1,15 @@
+graph LR
+V[Take Photo]
+Y[Show Floorplan] --> AA[Select Destination]
+    V[Take Photo] --> W[AWS REKOGNITION]
+    W --> X{Valid Prediction?（> confident level）}
+    X -->|Yes| AB[Compass Navigation]
+    AA --> AB
+    X -->|No| Z[Scan Again]
+    Z --> V
+    AB --> AC[Arrived?]
+    AC -->|Yes| AD[Next Direction]
+    AD --> AB
+    AC -->|No| AB
+    AD --> |ANY TIME| AE[New Photo?]
+    AE -->|Yes| V

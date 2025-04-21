@@ -18,7 +18,7 @@ import {
 } from 'react-native';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import Compass from '../../components/Compass';
-import floorplan from '../../image/ulib_floorplan.png';
+import floorplan from '../../image/gine_10F_floorplan.png';
 import { AntDesign } from '@expo/vector-icons';
 import { UploadS3 } from '@/components/UploadS3'; // adjust path as needed
 import ImageDetect from '@/api/imageDetect';
@@ -27,77 +27,184 @@ import CalculateOrientation from '@/components/CountDirection';
 
 const savedHighlightedArea = [
   {
-      "accessibleNode": [
-          1
-      ],
-      "color": "#901385",
-      "height": 20.666656494140625,
+      "accessibleNode": [1],
+      "color": "#751053",
+      "height": 34.33332824707031,
       "id": 0,
-      "name": "lobby",
-      "width": 38.66667175292969,
-      "x": 208.3333282470703,
-      "y": 6
+      "name": "industLift",
+      "width": 49,
+      "x": 84.33332824707031,
+      "y": 0.666656494140625
   },
   {
-      "accessibleNode": [
-          0,
-          3,
-          2
-      ],
-      "color": "#DDE82A",
-      "height": 24.333328247070312,
+      "accessibleNode": [7, 0, 2],
+      "color": "#3D28A5",
+      "height": 21,
       "id": 1,
-      "name": "study area",
-      "width": 52,
-      "x": 151,
-      "y": 4.3333282470703125
+      "name": "southCorr5",
+      "width": 22.666671752929688,
+      "x": 96.33332824707031,
+      "y": 36.666656494140625
   },
   {
-      "accessibleNode": [1,4],
-      "color": "#79D0D4",
-      "height": 55.66667175292969,
+      "accessibleNode": [1, 3],
+      "color": "#EC01CC",
+      "height": 19,
       "id": 2,
-      "name": "lift",
-      "width": 23.333328247070312,
-      "x": 160,
-      "y": 31.333328247070312
+      "name": "southCorr4",
+      "width": 25.666656494140625,
+      "x": 95,
+      "y": 60.99998474121094
   },
   {
-      "accessibleNode": [
-          1
-      ],
-      "color": "#0D3A41",
-      "height": 60.666656494140625,
+      "accessibleNode": [2, 4],
+      "color": "#64346F",
+      "height": 21.333328247070312,
       "id": 3,
-      "name": "books",
-      "width": 14,
-      "x": 187.66665649414062,
-      "y": 29
+      "name": "southCorr3",
+      "width": 21,
+      "x": 98.33332824707031,
+      "y": 83.33332824707031
   },
   {
-      "accessibleNode": [
-          2,
-          5
-      ],
-      "color": "#74C423",
-      "height": 47,
+      "accessibleNode": [5, 3],
+      "color": "#B3F89B",
+      "height": 23,
       "id": 4,
-      "name": "exhibition",
-      "width": 38.33332824707031,
-      "x": 166,
-      "y": 97.33332824707031
+      "name": "southCorr2",
+      "width": 21.333328247070312,
+      "x": 98,
+      "y": 103.99998474121094
   },
   {
-      "accessibleNode": [
-          4
-      ],
-      "color": "#C2824D",
-      "height": 41,
+      "accessibleNode": [6, 4],
+      "color": "#4D882C",
+      "height": 23.666671752929688,
       "id": 5,
-      "name": "reading area",
-      "width": 45.33332824707031,
-      "x": 162,
-      "y": 153.3333282470703
+      "name": "southCorr1",
+      "width": 24,
+      "x": 96,
+      "y": 127.99998474121094
+  },
+  {
+      "accessibleNode": [5],
+      "color": "#FCC78F",
+      "height": 24.666671752929688,
+      "id": 6,
+      "name": "cseDepart",
+      "width": 39.66667175292969,
+      "x": 88.66665649414062,
+      "y": 151.99998474121094
+  },
+  {
+      "accessibleNode": [1, 8],
+      "color": "#090C02",
+      "height": 15,
+      "id": 7,
+      "name": "corr1",
+      "width": 18.666671752929688,
+      "x": 122.33332824707031,
+      "y": 38.99998474121094
+  },
+  {
+      "accessibleNode": [7, 9],
+      "color": "#FFB3A9",
+      "height": 26.666671752929688,
+      "id": 8,
+      "name": "corr2",
+      "width": 23,
+      "x": 146.66665649414062,
+      "y": 32.99998474121094
+  },
+  {
+      "accessibleNode": [8, 10],
+      "color": "#30A462",
+      "height": 27.333343505859375,
+      "id": 9,
+      "name": "corr3",
+      "width": 26,
+      "x": 171,
+      "y": 31.999984741210938
+  },
+  {
+      "accessibleNode": [9, 11],
+      "color": "#6CB917",
+      "height": 32.33332824707031,
+      "id": 10,
+      "name": "corr4",
+      "width": 26.333328247070312,
+      "x": 197,
+      "y": 29.666656494140625
+  },
+  {
+      "accessibleNode": [10, 12],
+      "color": "#A2EFBF",
+      "height": 39.33332824707031,
+      "id": 11,
+      "name": "lift",
+      "width": 39.66667175292969,
+      "x": 223.66665649414062,
+      "y": 22.333328247070312
+  },
+  {
+      "accessibleNode": [11, 13],
+      "color": "#5515F2",
+      "height": 9.666656494140625,
+      "id": 12,
+      "name": "toilet",
+      "width": 34.333343505859375,
+      "x": 225.66665649414062,
+      "y": 67.33332824707031
+  },
+  {
+      "accessibleNode": [12, 14],
+      "color": "#1A18F1",
+      "height": 22.333328247070312,
+      "id": 13,
+      "name": "nothCorr1",
+      "width": 38.666656494140625,
+      "x": 224,
+      "y": 83.33332824707031
+  },
+  {
+      "accessibleNode": [13, 15],
+      "color": "#28BA9D",
+      "height": 24,
+      "id": 14,
+      "name": "nothCorr2",
+      "width": 53,
+      "x": 216.66665649414062,
+      "y": 103.66665649414062
+  },
+  {
+      "accessibleNode": [14, 16],
+      "color": "#511DB0",
+      "height": 23.333328247070312,
+      "id": 15,
+      "name": "office1",
+      "width": 41,
+      "x": 224.3333282470703,
+      "y": 128.3333282470703
+  },
+  {
+      "accessibleNode": [15, 17],
+      "color": "#D1D5BB",
+      "height": 16.666671752929688,
+      "id": 16,
+      "name": "office2",
+      "width": 51,
+      "x": 221.66665649414062,
+      "y": 155.99998474121094
+  },
+  {
+      "accessibleNode": [16],
+      "color": "#800719",
+      "height": 25,
+      "id": 17,
+      "name": "office3",
+      "width": 42.66667175292969,
+      "x": 222.66665649414062,
+      "y": 174.99998474121094
   }
 ]
 
@@ -120,6 +227,7 @@ export default function Camera() {
 
   const [tapCount, setTapCount] = useState(0);
   const [lastTap, setLastTap] = useState(null);
+  const [activeCompass, setActiveCompass] = useState(false)
 
   useEffect(() => {
     if (isSearching) {
@@ -169,7 +277,7 @@ export default function Camera() {
   };
 
 
-  const model = "arn:aws:rekognition:us-east-1:354392660622:project/fyp_ulib/version/fyp_ulib.2025-04-21T01.56.20/1745171780107"
+  const model = "arn:aws:rekognition:us-east-1:354392660622:project/fyp_engine_10F/version/fyp_engine_10F.2025-04-20T23.15.17/1745162117151"
   const bucket = 'fyp-final'
   const testingPhoto = 'testing_image/testingPhoto.jpg'
   const min_confidence = 40
@@ -192,9 +300,15 @@ export default function Camera() {
           const scanResult = await ImageDetect(model, bucket, testingPhoto, min_confidence);
           console.log('scanResult is:')
           console.log(scanResult)
+          if(scanResult == null) {
+            setIsLoading(false)
+            setActiveCompass(false)
+            return Alert.alert("Please scan again")
+          }
           setScanedResult(
             savedHighlightedArea.find(item => item.name === scanResult?.label)?.id ?? -1
           );
+          {scanResult && setActiveCompass(true)}
           setIsLoading(false)
         } catch (error) {
           console.error("Error uploading to S3:", error);
@@ -255,7 +369,7 @@ export default function Camera() {
                     savedHighlightedArea,
                     path[allocationOrder - 1],
                     path[allocationOrder]
-                  ) || 0) - 90 + 45 + 180) % 360
+                  ) || 0)) % 360
                 } />
               </>
             }
@@ -293,20 +407,23 @@ export default function Camera() {
           </View>
 
           {
-            path.length > 0 && allocationOrder < path.length && (
+            path.length > 0 && allocationOrder < path.length && activeCompass && (
               <TouchableOpacity
                 onPress={
                   () => {
+                    // setActiveCompass(false)
                     setAllocationOrder(allocationOrder + 1)
                     console.log("allocationOrder is: ")
                     console.log(allocationOrder)
                     if (allocationOrder == path.length - 1) {
                       Alert.alert("You have arrived your destination!")
+                      setActiveCompass(false)
+                      setSelectedNode(null)
                     }
                   }}
                 style={styles.nextButton}
               >
-                <Text style={styles.nextButtonText}>Arrived {savedHighlightedArea[path[allocationOrder]].name}</Text>
+              <Text style={styles.nextButtonText}>Arrived {savedHighlightedArea[path[allocationOrder]].name}</Text>
               </TouchableOpacity>
             )
           }
