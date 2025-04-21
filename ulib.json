@@ -1,0 +1,75 @@
+[
+    {
+        "accessibleNode": [
+            1
+        ],
+        "color": "#901385",
+        "height": 20.666656494140625,
+        "id": 0,
+        "name": "lobby",
+        "width": 38.66667175292969,
+        "x": 208.3333282470703,
+        "y": 6
+    },
+    {
+        "accessibleNode": [
+            0,
+            3,
+            2
+        ],
+        "color": "#DDE82A",
+        "height": 24.333328247070312,
+        "id": 1,
+        "name": "study area",
+        "width": 52,
+        "x": 151,
+        "y": 4.3333282470703125
+    },
+    {
+        "accessibleNode": [1,4],
+        "color": "#79D0D4",
+        "height": 55.66667175292969,
+        "id": 2,
+        "name": "lift",
+        "width": 23.333328247070312,
+        "x": 160,
+        "y": 31.333328247070312
+    },
+    {
+        "accessibleNode": [
+            1
+        ],
+        "color": "#0D3A41",
+        "height": 60.666656494140625,
+        "id": 3,
+        "name": "books",
+        "width": 14,
+        "x": 187.66665649414062,
+        "y": 29
+    },
+    {
+        "accessibleNode": [
+            2,
+            5
+        ],
+        "color": "#74C423",
+        "height": 47,
+        "id": 4,
+        "name": "exhibition",
+        "width": 38.33332824707031,
+        "x": 166,
+        "y": 97.33332824707031
+    },
+    {
+        "accessibleNode": [
+            4
+        ],
+        "color": "#C2824D",
+        "height": 41,
+        "id": 5,
+        "name": "reading area",
+        "width": 45.33332824707031,
+        "x": 162,
+        "y": 153.3333282470703
+    }
+]
